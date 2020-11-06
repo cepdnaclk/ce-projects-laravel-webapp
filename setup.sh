@@ -1,14 +1,17 @@
 
-# install the required modules
-composer install
+# Copy env file
+echo "Setup env file with defaults..."
+php -r "file_exists('.env') || copy('.env.example', '.env');"
 
+# install the required modules
 echo "Installing dependencies..."
+composer install
 
 # generate key
 php artisan key:generate
 
 # setup permission
-chmod -R 777 app/storage
+chmod -R 777 app/storage bootstrap/cache
 
 # Adding auth options
 composer require laravel/ui 2.1
@@ -22,7 +25,8 @@ npm run development
 # npm run production
 
 # echo "Creating the database : sqlite"
-# touch ./database/database.sqlite
+# mkdir -p database
+# touch database/database.sqlite
 
 php artisan migrate
 
