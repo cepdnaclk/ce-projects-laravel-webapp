@@ -14,8 +14,9 @@ php artisan key:generate
 chmod -R 777 app/storage bootstrap/cache
 
 # Adding auth options
-composer require laravel/ui 2.1
-php artisan ui vue --auth
+#composer require laravel/ui 2.1
+#php artisan ui vue --auth
+
 npm run development
 
 
