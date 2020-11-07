@@ -19,4 +19,22 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
+Route::get('dashboard/home', 'HomeController@index')->name('dashboard.home');
+
+
+// Category Routes
+Route::get('categories/', 'CategoryController@showCategories')->name('list.category.index');
+Route::get('batches/', 'CategoryController@showBatches')->name('list.batch.index');
+
+Route::get('batch/{batch_id}/', 'CategoryController@showBatchCategories')->name('category.showBatchCategories');
+Route::get('category/{category_title}/', 'CategoryController@showCategoryBatches')->name('category.showCategoryBatches');
+
+
+// Project Routes
+Route::get('projects/', 'ProjectController@index')->name('project.index');
+Route::get('project/{project}/', 'ProjectController@show')->name('project.show');
+
+// Batch/Category specific project (need a routing mechanism in future)
+Route::get('batch/{batch_id}/{category_title}', 'ProjectController@showBC_Project')->name('category.showBC.Project');
+Route::get('category/{category_title}/{batch_id}', 'ProjectController@showCB_Project')->name('category.showCB.Project');
+
