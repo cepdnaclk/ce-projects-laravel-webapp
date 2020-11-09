@@ -3,7 +3,7 @@
 @section('title', "Docs")
 
 @section('content')
-    <div class="p-0">
+    <div class="p-5">
         This is the docs index page, will be listed all the available docs
 
         <p>Sample Pages</p>
