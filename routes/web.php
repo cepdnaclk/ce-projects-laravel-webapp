@@ -27,8 +27,12 @@ Route::group(['middleware' => 'verified'], function () {
     Route::get('dashboard/updateProjects', 'MaintainController@updateProjects')->name('dashboard.updateProjects');
     Route::get('dashboard/test', 'MaintainController@test')->name('dashboard.test');
 
-
 });
+
+// Documentation Routes
+
+Route::get('docs/', 'DocsController@index')->name('docs.index');
+Route::get('docs/{title}', 'DocsController@page')->name('docs.page');
 
 
 // Category Routes

@@ -1,5 +1,7 @@
 @extends('layouts.public')
 
+@section('title',"Batches")
+
 @section('content')
     <div class="p-3">
         <p>This will show batches of the department, and once clicked on a batch, it will show the projects done under
