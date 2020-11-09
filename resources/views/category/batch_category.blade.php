@@ -1,5 +1,7 @@
 @extends('layouts.public')
 
+@section('title',"Projects")
+
 @section('content')
     <div class="p-3">
         <p>This will list the categories under the given batch {{ $batch_id }}</p>

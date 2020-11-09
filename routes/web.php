@@ -21,6 +21,19 @@ Auth::routes();
 
 Route::get('dashboard/home', 'HomeController@index')->name('dashboard.home');
 
+Route::group(['middleware' => 'verified'], function () {
+
+    Route::get('dashboard/updateCategories', 'MaintainController@updateCategories')->name('dashboard.updateCategories');
+    Route::get('dashboard/updateProjects', 'MaintainController@updateProjects')->name('dashboard.updateProjects');
+    Route::get('dashboard/test', 'MaintainController@test')->name('dashboard.test');
+
+});
+
+// Documentation Routes
+
+Route::get('docs/', 'DocsController@index')->name('docs.index');
+Route::get('docs/{title}', 'DocsController@page')->name('docs.page');
+
 
 // Category Routes
 Route::get('categories/', 'CategoryController@showCategories')->name('list.category.index');
