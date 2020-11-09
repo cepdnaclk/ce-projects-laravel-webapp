@@ -8,7 +8,7 @@
 
         <p>Sample Pages</p>
         <ul>
-            <li><a href="./project-design">Project Design</a></li>
+            <li><a href="{{ route('docs.page', 'project-design') }}">Project Design</a></li>
         </ul>
     </div>
 @endsection
