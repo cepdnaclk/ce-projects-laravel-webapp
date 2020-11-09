@@ -1,5 +1,7 @@
 @extends('layouts.public')
 
+@section('title',"Categories")
+
 @section('content')
     <div class="p-3">
 
