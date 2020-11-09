@@ -12,6 +12,10 @@ class DocsController extends Controller
         'project-design'=>[
             'title' => 'Project Design',
             'link' => 'https://docs.google.com/document/d/e/2PACX-1vQOIQtoEDanIcvGF0tPCOs12sAWdebOzoFrPjY80a8wmufrk8YVHEzI7DYkeET6khXEtK5M-mmRrOW3/pub?embedded=true'
+        ],
+        'github_projects'=>[
+            'title' => 'Current Project Site',
+            'link'=>'https://cepdnaclk.github.io/projects/'
         ]
     ];
 

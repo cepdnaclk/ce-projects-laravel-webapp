@@ -1,4 +1,4 @@
-@extends('layouts.public')
+@extends('layouts.docs')
 
 @section('title', "Docs - ".$data['title'])
 

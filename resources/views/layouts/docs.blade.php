@@ -35,7 +35,7 @@
         </div>
     </nav>
 
-    <main class="py-4 p-1">
+    <main class="py-2 p-0">
         @yield('content')
     </main>
 </div>
