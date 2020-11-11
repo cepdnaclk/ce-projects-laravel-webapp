@@ -35,14 +35,17 @@ class ProjectController extends Controller
 
     public function show($title)
     {
+        // Request project data from internal API
 
-        //dd([$this->githubOrgName, $title]);
-
-        $request = Request::create('/api/repository/' . $title, 'GET');
+        $request = Request::create(  route('api.repository.show',$title), 'GET');
         $response = Route::dispatch($request);
         $data = json_decode($response->getContent(), true);
 
-        return view('project.view', compact(['title', 'data']));
+        if($data != null){
+            return view('project.view', compact(['title', 'data']));
+        }else{
+            return \Response::view('errors.404',[],404);
+        }
     }
 
 

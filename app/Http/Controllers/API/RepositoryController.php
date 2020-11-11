@@ -21,11 +21,14 @@ class RepositoryController extends Controller
 
     public function index()
     {
-        //$d =  GitHub::api('organizations')->repositories($this->githubOrgName);
+        // Ex: http://ce-projects.nuwanjaliyagoda.com/api/repositories
+
         $allRepos = $this->paginator->fetchAll($this->client->user(), 'repositories', [$this->githubOrgName]);
 
         //  Filter: e{batch}-{tag}-
         $pattern = "/^e\d{2}-\w*-/";// "/e\d{2}/";
+
+        // Can use this link to check the functionality of RegEx expressions: https://regexr.com/
 
         // Filter the repositories  by regex filter
         $filtered = collect($allRepos)->filter(function ($value, $key) use ($pattern) {
@@ -70,8 +73,9 @@ class RepositoryController extends Controller
 
     public function show($title)
     {
+        // Ex: http://ce-projects.nuwanjaliyagoda.com/api/repository/{{title}}
+
         $repo = GitHub::repo()->show($this->githubOrgName, $title);
-        //dd($repo);
 
         $parts = explode('-', $repo['name']);
         $repoName = substr($repo['name'], (strlen($parts[0]) + 2 + strlen($parts[1])));

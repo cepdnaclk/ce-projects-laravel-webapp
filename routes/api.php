@@ -19,5 +19,5 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 
-Route::get('repository/{title}', 'API\RepositoryController@show');
-Route::get('repositories/', 'API\RepositoryController@index');
+Route::get('repository/{title}', 'API\RepositoryController@show')->name('api.repository.show');
+Route::get('repositories/', 'API\RepositoryController@index')->name('api.repository.index');

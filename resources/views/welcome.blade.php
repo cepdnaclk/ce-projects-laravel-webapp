@@ -20,9 +20,10 @@
             margin: 0;
         }
 
-        .d-none{
+        .d-none {
             display: none;
         }
+
         .full-height {
             height: 100vh;
         }
@@ -73,11 +74,11 @@
             @auth
                 <a href="{{ route('dashboard.home') }}">Home</a>
             @else
-                <a href="{{ route('login') }}">Login</a>
+                {{-- <a href="{{ route('login') }}">Login</a>
 
                 @if (Route::has('register'))
                     <a href="{{ route('register') }}">Register</a>
-                @endif
+                @endif --}}
             @endauth
         </div>
     @endif
