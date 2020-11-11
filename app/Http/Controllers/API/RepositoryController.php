@@ -80,6 +80,20 @@ class RepositoryController extends Controller
         $parts = explode('-', $repo['name']);
         $repoName = substr($repo['name'], (strlen($parts[0]) + 2 + strlen($parts[1])));
 
+
+        // Contributors:  https://api.github.com/repos/nuwanj/FYP-simulator-gui/contributors
+        //      avatar_url, html_url, login, contributions
+
+        // Contributors:  https://api.github.com/repos/nuwanj/FYP-simulator-gui/languages
+        //      list of languages used
+
+
+        // Search: https://api.github.com/search/code?q=arduino+org:cepdnaclk
+        // Search: https://api.github.com/search/repository?q=arduino+org:cepdnaclk
+        //      https://docs.github.com/en/free-pro-team@latest/rest/reference/search
+        //      https://docs.github.com/en/free-pro-team@latest/rest/reference/search#constructing-a-search-query
+
+
         $resp = [
             'name' => $repoName,
             'fullName' => $repo['name'],
