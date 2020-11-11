@@ -5,22 +5,33 @@ namespace App\Http\Controllers;
 // https://laravel.com/docs/8.x/http-client
 use App\Category;
 use App\Project;
+use Github\Api\User;
+use GrahamCampbell\GitHub\Facades\GitHub;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
-
 use Illuminate\Http\Request;
+
+use Github\ResultPager;
+use GrahamCampbell\GitHub\GitHubManager;
+use Illuminate\Support\Str;
 
 class MaintainController extends Controller
 {
 
-    protected $githubOrg = "https://github.com/cepdnaclk/";
+    protected $githubOrgName = "cepdnaclk";
     protected $githubPage = "https://cepdnaclk.github.io/";
-
     protected $baseRepository = "http://nuwanj.github.io/ce-projects-data-repository/";
 
-    public function __construct()
+    protected $client;
+    protected $paginator;
+
+    public function __construct(GitHubManager $manager)
     {
+        $this->client = $manager->connection();
+        $this->paginator = new \Github\ResultPager($this->client);
+
         $this->middleware('auth');
+
     }
 
     public function updateCategories()
@@ -64,7 +75,6 @@ class MaintainController extends Controller
         //dd($data);
 
     }
-
 
     public function updateProjects()
     {
@@ -115,6 +125,16 @@ class MaintainController extends Controller
     public function test()
     {
         echo Project::getBrowserLink("My Sample Project");
+
+    }
+
+    public function github()
+    {
+
+        $d = [];
+
+        //print($repositories);
+        dd($d);
 
     }
 }

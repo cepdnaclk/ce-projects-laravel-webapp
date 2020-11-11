@@ -27,6 +27,8 @@ Route::group(['middleware' => 'verified'], function () {
     Route::get('dashboard/updateProjects', 'MaintainController@updateProjects')->name('dashboard.updateProjects');
     Route::get('dashboard/test', 'MaintainController@test')->name('dashboard.test');
 
+    Route::get('dashboard/github', 'MaintainController@github')->name('dashboard.github');
+
 });
 
 // Documentation Routes
@@ -45,7 +47,7 @@ Route::get('category/{category_title}/', 'CategoryController@showCategoryBatches
 
 // Project Routes
 Route::get('projects/', 'ProjectController@index')->name('project.index');
-Route::get('project/{project}/', 'ProjectController@show')->name('project.show');
+Route::get('project/{project_id}', 'ProjectController@show')->name('project.show');
 
 // Batch/Category specific project (need a routing mechanism in future)
 Route::get('batch/{batch_id}/{category_title}', 'ProjectController@showBC_Project')->name('category.showBC.Project');
