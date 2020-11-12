@@ -1,4 +1,4 @@
-@extends('layouts.public')
+@extends('layouts.public0')
 
 @section('title','Project')
 
@@ -15,6 +15,9 @@
         Data:
         <pre>{{ json_encode($data,JSON_PRETTY_PRINT) }}</pre>
 
+
+        Suggested Templates:
+        https://startbootstrap.com/template/blog-post
 
 
     </div>

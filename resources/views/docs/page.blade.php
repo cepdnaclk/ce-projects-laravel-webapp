@@ -1,6 +1,10 @@
-@extends('layouts.docs')
+@extends('layouts.public')
 
 @section('title', "Docs - ".$data['title'])
+
+@section('navibar')
+    @include('includes.navibar')
+@endsection
 
 @section('content')
     <div>

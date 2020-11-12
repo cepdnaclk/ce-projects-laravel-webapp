@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title',"Projects - Categories")
+@section('title',"Project Categories")
 
 @section('content')
     <div class="p-3">

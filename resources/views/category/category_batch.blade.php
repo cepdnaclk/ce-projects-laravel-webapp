@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title',"Projects - Batches")
+@section('title',"Project Batches")
 
 @section('content')
     <div class="p-3">
