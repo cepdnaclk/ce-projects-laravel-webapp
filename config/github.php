@@ -24,7 +24,7 @@ return [
     |
     */
 
-    'default' => 'none',
+    'default' => 'main',
 
     /*
     |--------------------------------------------------------------------------
@@ -51,8 +51,8 @@ return [
 
         'app' => [
             'method'       => 'application',
-            'clientId'     => 'your-client-id',
-            'clientSecret' => 'your-client-secret',
+            'clientId'     => env('GITHUB_CLIENT_ID'),
+            'clientSecret' => env('GITHUB_CLIENT_SECRET'),
             // 'backoff'      => false,
             // 'cache'        => false,
             // 'version'      => 'v3',
@@ -61,7 +61,7 @@ return [
 
         'jwt' => [
             'method'       => 'jwt',
-            'token'        => 'your-jwt-token',
+            'token'        => env('GITHUB_ACCESS_TOKEN'),
             // 'backoff'      => false,
             // 'cache'        => false,
             // 'version'      => 'v3',
@@ -70,8 +70,8 @@ return [
 
         'private' => [
             'method'     => 'private',
-            'appId'      => 'your-github-app-id',
-            'keyPath'    => 'your-private-key-path',
+            'appId'      => '',
+            'keyPath'    => '',
             // 'key'        => 'your-private-key-content',
             // 'backoff'    => false,
             // 'cache'      => false,

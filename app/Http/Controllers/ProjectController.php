@@ -37,9 +37,7 @@ class ProjectController extends Controller
     {
         // Request project data from internal API
 
-        $request = Request::create(  route('api.repository.show',$title), 'GET');
-        $response = Route::dispatch($request);
-        $data = json_decode($response->getContent(), true);
+        $data = Project::getGithubData($title);
 
         if($data != null){
             return view('project.view', compact(['title', 'data']));

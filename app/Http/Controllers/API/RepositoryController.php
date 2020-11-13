@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Project;
 use GrahamCampbell\GitHub\Facades\GitHub;
 use Illuminate\Http\Request;
 
@@ -46,6 +47,7 @@ class RepositoryController extends Controller
                 'fullName' => $repo['name'],
                 'description' => $repo['description'],
                 'batch' => $parts[0],
+                'category' => $parts[1],
 
                 'repoLink' => $repo['html_url'],
                 'pageLink' => $repo['has_pages'] ? ("https://" . $this->githubOrgName . ".github.io/" . $repo['name']) : '',
@@ -57,8 +59,8 @@ class RepositoryController extends Controller
                 'language' => $repo['language'],
                 'forks' => $repo['forks'],
                 'watchers' => $repo['watchers'],
-                'created_at' => $repo['created_at'],
-                'updated_at' => $repo['updated_at'],
+                'created_at' => date_format(date_create($repo['created_at']), "Y/m/d"),
+                'updated_at' => date_format(date_create($repo['updated_at']), "Y/m/d h:i:s"),
                 'default_branch' => $repo['default_branch'],
 
                 /*'owner' => $repo['owner'],*/
@@ -78,13 +80,27 @@ class RepositoryController extends Controller
         $repo = GitHub::repo()->show($this->githubOrgName, $title);
 
         $parts = explode('-', $repo['name']);
-        $repoName = substr($repo['name'], (strlen($parts[0]) + 2 + strlen($parts[1])));
+
+        // TODO: Need to format this in better way
+        $repoName = Project::formatTitle(substr($repo['name'], (strlen($parts[0]) + 2 + strlen($parts[1]))));
+
+        $contributors = GitHub::api('repo')->contributors($this->githubOrgName, $title);
+        $languages = GitHub::api('repo')->languages($this->githubOrgName, $title);
+        //$communityProfile = GitHub::api('repo')->communityProfile($this->githubOrgName, $title);
+
+        $contributorArray = collect($contributors)->map(function ($watcher) {
+            return [
+                'username' => $watcher['login'],
+                'avatar' => $watcher['avatar_url'],
+                'url' => $watcher['html_url'],
+            ];
+        });
 
 
         // Contributors:  https://api.github.com/repos/nuwanj/FYP-simulator-gui/contributors
         //      avatar_url, html_url, login, contributions
 
-        // Contributors:  https://api.github.com/repos/nuwanj/FYP-simulator-gui/languages
+        // Languages:  https://api.github.com/repos/nuwanj/FYP-simulator-gui/languages
         //      list of languages used
 
 
@@ -99,6 +115,7 @@ class RepositoryController extends Controller
             'fullName' => $repo['name'],
             'description' => $repo['description'],
             'batch' => $parts[0],
+            /*'communityProfile' => $communityProfile,*/
 
             'repoLink' => $repo['html_url'],
             'pageLink' => $repo['has_pages'] ? ("https://" . $this->githubOrgName . ".github.io/" . $repo['name']) : '',
@@ -106,14 +123,25 @@ class RepositoryController extends Controller
             'has_pages' => $repo['has_pages'],
             'has_wiki' => $repo['has_wiki'],
 
+            'watchers' =>  $repo['watchers'],
+
+            'contributors' => [
+                'count' => count($contributorArray),
+                'list' => $contributorArray
+            ],
+            'languages' => [
+                'main' => $repo['language'],
+                'count' => count($languages),
+                'total' => array_sum($languages),
+                'list' => $languages
+            ],
+
             'private' => $repo['private'],
-            'language' => $repo['language'],
             'forks' => $repo['forks'],
-            'watchers' => $repo['watchers'],
             'default_branch' => $repo['default_branch'],
 
-            'created_at' => $repo['created_at'],
-            'updated_at' => $repo['updated_at'],
+            'created_at' => date_format(date_create($repo['created_at']), "Y/m/d"),
+            'updated_at' => date_format(date_create($repo['updated_at']), "Y/m/d h:i:s"),
         ];
 
         return response()->json($resp);

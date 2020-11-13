@@ -8,14 +8,19 @@
         <p>This will show all available categories, once clicked on a category, it will go to a page that allow users to
             select a batch.</p>
 
-        Ex:
-
         <ul>
-            <li><a href="/category/2YP">2nd Year Projects</a></li>
-            <li><a href="/category/Unified">Unified Projects</a></li>
-            <li><a href="/category/FYP">Final Year Projects</a></li>
+        @foreach($data['repositories'] as  $repo)
+                <li>
+                    <a target="_blank" href="{{ route('project.show', $repo['fullName']) }}">
+                        {{ $repo['batch'] }} | {{ $repo['category'] }} | {{ $repo['name'] }}
+                    </a>
+                </li>
+        @endforeach
         </ul>
 
+
+        Data:
+        <pre>{{ json_encode($data,JSON_PRETTY_PRINT) }}</pre>
 
     </div>
 
