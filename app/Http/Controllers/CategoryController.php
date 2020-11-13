@@ -20,7 +20,7 @@ class CategoryController extends Controller
         if($data != null){
             return view('category.categories', compact(['data']));
         }else{
-            return \Response::view('errors.404',[],404);
+            return \Response::view('errors.500',[],500);
         }
         //return view('category.categories');
     }

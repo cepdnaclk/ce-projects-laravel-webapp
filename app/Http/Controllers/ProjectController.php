@@ -42,7 +42,7 @@ class ProjectController extends Controller
         if($data != null){
             return view('project.view', compact(['title', 'data']));
         }else{
-            return \Response::view('errors.404',[],404);
+            return \Response::view('errors.500',[],500);
         }
     }
 
