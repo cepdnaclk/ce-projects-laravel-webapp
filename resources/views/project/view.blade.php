@@ -181,7 +181,9 @@
                         <div class="card-body">
                             <ul class="list-unstyled mb-0">
                                 @foreach($data['languages']['list'] as $lang => $usage)
-                                    <li>{{ $lang }} - {{ 100*round($usage/$data['languages']['total'],2) }} %</li>
+                                    @if($usage>0)
+                                        <li>{{ $lang }} - {{ 100*round( $usage/$data['languages']['total'] ,4 ) }} %</li>
+                                    @endif
                                 @endforeach
                             </ul>
                         </div>
