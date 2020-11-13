@@ -25,7 +25,7 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     @stack('styles')
 
-    <title>@yield('title') | projects.ca.pdn.ac.lk</title>
+    <title>@yield('title') | projects.ce.pdn.ac.lk</title>
 </head>
 <body>
 <div id="app">
