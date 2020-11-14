@@ -20,9 +20,10 @@
             margin: 0;
         }
 
-        .d-none{
+        .d-none {
             display: none;
         }
+
         .full-height {
             height: 100vh;
         }
@@ -71,13 +72,13 @@
     @if (Route::has('login'))
         <div class="top-right links">
             @auth
-                <a href="{{ route('dashboard.home') }}">Home</a>
+                <a href="{{ route('dashboard.pages') }}">Home</a>
             @else
-                <a href="{{ route('login') }}">Login</a>
+                {{-- <a href="{{ route('login') }}">Login</a>
 
                 @if (Route::has('register'))
                     <a href="{{ route('register') }}">Register</a>
-                @endif
+                @endif --}}
             @endauth
         </div>
     @endif

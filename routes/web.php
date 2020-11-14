@@ -13,19 +13,22 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
 
 Auth::routes();
 
-Route::get('dashboard/home', 'HomeController@index')->name('dashboard.home');
+Route::get('/', 'PageController@home')->name('home');
+Route::get('/about', 'PageController@about')->name('about');
+Route::get('/contact', 'PageController@contact')->name('contact');
+
+Route::get('dashboard/pages', 'PageController@index')->name('dashboard.pages');
 
 Route::group(['middleware' => 'verified'], function () {
 
     Route::get('dashboard/updateCategories', 'MaintainController@updateCategories')->name('dashboard.updateCategories');
     Route::get('dashboard/updateProjects', 'MaintainController@updateProjects')->name('dashboard.updateProjects');
     Route::get('dashboard/test', 'MaintainController@test')->name('dashboard.test');
+
+    Route::get('dashboard/github', 'MaintainController@github')->name('dashboard.github');
 
 });
 
@@ -45,7 +48,7 @@ Route::get('category/{category_title}/', 'CategoryController@showCategoryBatches
 
 // Project Routes
 Route::get('projects/', 'ProjectController@index')->name('project.index');
-Route::get('project/{project}/', 'ProjectController@show')->name('project.show');
+Route::get('project/{project_id}', 'ProjectController@show')->name('project.show');
 
 // Batch/Category specific project (need a routing mechanism in future)
 Route::get('batch/{batch_id}/{category_title}', 'ProjectController@showBC_Project')->name('category.showBC.Project');

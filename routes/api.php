@@ -17,3 +17,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+
+Route::get('repository/{title}', 'API\RepositoryController@show')->name('api.repository.show');
+Route::get('repositories/', 'API\RepositoryController@index')->name('api.repository.index');
