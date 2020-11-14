@@ -1,4 +1,4 @@
-@extends('layouts.public')
+@extends('layouts.public0')
 
 @section('title',"Projects")
 

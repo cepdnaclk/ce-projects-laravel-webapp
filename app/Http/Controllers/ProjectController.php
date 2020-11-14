@@ -3,14 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Project;
+use GrahamCampbell\GitHub\Facades\GitHub;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 class ProjectController extends Controller
 {
+    protected $githubOrgName;
 
     public function __construct()
     {
         //$this->middleware('auth');
+        $this->githubOrgName = env('GITHUB_ORGANIZATION');
     }
 
     public function index()
@@ -29,9 +33,17 @@ class ProjectController extends Controller
         //
     }
 
-    public function show(Project $project)
+    public function show($title)
     {
-        return view('project.view', compact('project'));
+        // Request project data from internal API
+
+        $data = Project::getGithubData($title);
+
+        if($data != null){
+            return view('project.view', compact(['title', 'data']));
+        }else{
+            return \Response::view('errors.500',[],500);
+        }
     }
 
 

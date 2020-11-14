@@ -175,6 +175,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        GrahamCampbell\GitHub\GitHubServiceProvider::class
     ],
 
     /*
@@ -227,6 +228,7 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
 
+        'GitHub' => GrahamCampbell\GitHub\Facades\GitHub::class,
     ],
 
     'debug_hide' => [

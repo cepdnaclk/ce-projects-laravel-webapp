@@ -2,6 +2,10 @@
 
 @section('title', "Docs - ".$data['title'])
 
+@section('navibar')
+    @include('includes.navibar')
+@endsection
+
 @section('content')
     <div>
     <!--This is a doc page with given title, {{ $data['title'] }}<br>

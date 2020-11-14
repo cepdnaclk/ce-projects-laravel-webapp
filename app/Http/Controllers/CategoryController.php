@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Category;
+use App\Project;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -14,7 +15,14 @@ class CategoryController extends Controller
 
     public function showCategories()
     {
-        return view('category.categories');
+        $data = Category::getGithubData();
+
+        if($data != null){
+            return view('category.categories', compact(['data']));
+        }else{
+            return \Response::view('errors.500',[],500);
+        }
+        //return view('category.categories');
     }
 
     public function showBatches()
