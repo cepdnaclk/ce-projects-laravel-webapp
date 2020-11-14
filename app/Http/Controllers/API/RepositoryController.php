@@ -92,7 +92,9 @@ class RepositoryController extends Controller
             return [
                 'username' => $watcher['login'],
                 'avatar' => $watcher['avatar_url'],
+                /*'name' => $watcher['name'],*/
                 'url' => $watcher['html_url'],
+                'data' => $watcher,
             ];
         });
 
@@ -103,8 +105,10 @@ class RepositoryController extends Controller
         // Languages:  https://api.github.com/repos/nuwanj/FYP-simulator-gui/languages
         //      list of languages used
 
+        // User: https://api.github.com/users/{username}
+        //
 
-        // Search: https://api.github.com/search/code?q=arduino+org:cepdnaclk
+        // Search: https://api.github.com/search/code?q=arduino+:cepdnaclk
         // Search: https://api.github.com/search/repository?q=arduino+org:cepdnaclk
         //      https://docs.github.com/en/free-pro-team@latest/rest/reference/search
         //      https://docs.github.com/en/free-pro-team@latest/rest/reference/search#constructing-a-search-query
