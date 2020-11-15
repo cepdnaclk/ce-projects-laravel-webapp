@@ -5,7 +5,9 @@ use Illuminate\Database\Seeder;
 class CategorySeeder extends Seeder
 {
 
-    protected $data = [];
+    protected $data = [
+        array('id' => '1','category_code' => '3yp','title' => 'Unified Project','description' => '3rd year unified project','cover_image' => NULL,'thumb_image' => NULL,'filters' => '["^e\\\\d{2}-3yp-", "^e\\\\d{2}-unified-"]','contact' => 'isurun@eng.pdn.ac.lk','created_at' => '2020-11-15 11:53:53','updated_at' => '2020-11-15 11:53:53')
+    ];
 
     /**
      * Run the database seeds.

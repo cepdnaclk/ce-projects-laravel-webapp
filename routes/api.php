@@ -21,3 +21,5 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::get('repository/{title}', 'API\RepositoryController@show')->name('api.repository.show');
 Route::get('repositories/', 'API\RepositoryController@index')->name('api.repository.index');
+Route::get('repositories/{category_code}', 'API\RepositoryController@categoryIndex')->name('api.repository.filter');
+

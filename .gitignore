@@ -15,3 +15,5 @@ commands.txt
 workflow.txt
 
 .idea
+
+database/seeds/*

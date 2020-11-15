@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Category;
 use App\Http\Controllers\Controller;
 use App\Project;
 use GrahamCampbell\GitHub\Facades\GitHub;
@@ -36,41 +37,16 @@ class RepositoryController extends Controller
             return preg_match($pattern, $value['name']);
         });
 
-        $repositories = $filtered->map(function ($repo) {
+
+        $repositories = $filtered->mapWithKeys(function ($repo) {
             // This will filter out unwanted parameters from the repository list
-
-            $parts = explode('-', $repo['name']);
-            $repoName = substr($repo['name'], (strlen($parts[0]) + 2 + strlen($parts[1])));
-
-            return [
-                'name' => $repoName,
-                'fullName' => $repo['name'],
-                'description' => $repo['description'],
-                'batch' => $parts[0],
-                'category' => $parts[1],
-
-                'repoLink' => $repo['html_url'],
-                'pageLink' => $repo['has_pages'] ? ("https://" . $this->githubOrgName . ".github.io/" . $repo['name']) : '',
-
-                'has_pages' => $repo['has_pages'],
-                'has_wiki' => $repo['has_wiki'],
-
-                'private' => $repo['private'],
-                'language' => $repo['language'],
-                'forks' => $repo['forks'],
-                'watchers' => $repo['watchers'],
-                'created_at' => date_format(date_create($repo['created_at']), "Y/m/d"),
-                'updated_at' => date_format(date_create($repo['updated_at']), "Y/m/d h:i:s"),
-                'default_branch' => $repo['default_branch'],
-
-                /*'owner' => $repo['owner'],*/
-            ];
+            return $this->filterRepo($repo);
         });
 
         //print($repositories);
         return response()->json([
             'count' => count($repositories),
-            'repositories' => array_values($repositories->toArray())]);
+            'repositories' => $repositories]);
     }
 
     public function show($title)
@@ -88,13 +64,13 @@ class RepositoryController extends Controller
         $languages = GitHub::api('repo')->languages($this->githubOrgName, $title);
         //$communityProfile = GitHub::api('repo')->communityProfile($this->githubOrgName, $title);
 
-        $contributorArray = collect($contributors)->map(function ($watcher) {
+        $contributorArray = collect($contributors)->map(function ($contributor) {
             return [
-                'username' => $watcher['login'],
-                'avatar' => $watcher['avatar_url'],
-                /*'name' => $watcher['name'],*/
-                'url' => $watcher['html_url'],
-                'data' => $watcher,
+                'username' => $contributor['login'],
+                'avatar' => $contributor['avatar_url'],
+                /*'name' => $contributor['name'],*/
+                'url' => $contributor['html_url'],
+                /*'data' => $contributor,*/
             ];
         });
 
@@ -114,12 +90,68 @@ class RepositoryController extends Controller
         //      https://docs.github.com/en/free-pro-team@latest/rest/reference/search#constructing-a-search-query
 
 
-        $resp = [
+        $resp = $this->filterRepo($repo);
+
+        $resp['contributors'] = [
+            'count' => count($contributorArray),
+            'list' => $contributorArray
+        ];
+        $resp['languages'] = [
+            'main' => $repo['language'],
+            'count' => count($languages),
+            'total' => array_sum($languages),
+            'list' => $languages
+        ];
+
+        return response()->json($resp);
+    }
+
+    public function categoryIndex($category_code)
+    {
+
+        $c = Category::where('category_code', $category_code)->first();
+
+        if ($c == null) {
+            // If the category_code is not in the database
+            return response()->json(['count' => 0, 'repositories' => []]);
+        }
+
+        // Read all the available repositories in the organization
+        $allRepos = $this->paginator->fetchAll($this->client->user(), 'repositories', [$this->githubOrgName]);
+        $repositories = [];
+
+        // Filter with the given list of regex filters
+        foreach ($c->filters as $pattern) {
+
+            $filtered = collect($allRepos)->filter(function ($value, $key) use ($pattern) {
+                return preg_match("/" . $pattern . "/", $value['name']);
+            });
+
+            $newRepositories = $filtered->mapWithKeys(function ($repo) {
+                // This will filter out unwanted parameters from the repository list
+                return $this->filterRepo($repo);
+            });
+
+            // merge search results
+            $repositories = array_replace($repositories, $newRepositories->toArray());
+        }
+        return response()->json([
+                'count' => count($repositories),
+                'repositories' => $repositories]
+        );
+    }
+
+    private function filterRepo($repo)
+    {
+        $parts = explode('-', $repo['name']);
+        $repoName = substr($repo['name'], (strlen($parts[0]) + 2 + strlen($parts[1])));
+
+        return [$repo['name'] => [
             'name' => $repoName,
             'fullName' => $repo['name'],
             'description' => $repo['description'],
             'batch' => $parts[0],
-            /*'communityProfile' => $communityProfile,*/
+            'category' => $parts[1],
 
             'repoLink' => $repo['html_url'],
             'pageLink' => $repo['has_pages'] ? ("https://" . $this->githubOrgName . ".github.io/" . $repo['name']) : '',
@@ -127,28 +159,17 @@ class RepositoryController extends Controller
             'has_pages' => $repo['has_pages'],
             'has_wiki' => $repo['has_wiki'],
 
-            'watchers' =>  $repo['watchers'],
-
-            'contributors' => [
-                'count' => count($contributorArray),
-                'list' => $contributorArray
-            ],
-            'languages' => [
-                'main' => $repo['language'],
-                'count' => count($languages),
-                'total' => array_sum($languages),
-                'list' => $languages
-            ],
-
             'private' => $repo['private'],
+            'language' => $repo['language'],
             'forks' => $repo['forks'],
-            'default_branch' => $repo['default_branch'],
+            'watchers' => $repo['watchers'],
+            'stars' => $repo['stargazers_count'],
 
             'created_at' => date_format(date_create($repo['created_at']), "Y/m/d"),
             'updated_at' => date_format(date_create($repo['updated_at']), "Y/m/d h:i:s"),
-        ];
-
-        return response()->json($resp);
+            'default_branch' => $repo['default_branch'],
+        ]];
     }
+
 
 }
