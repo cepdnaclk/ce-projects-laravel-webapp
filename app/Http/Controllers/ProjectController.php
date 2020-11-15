@@ -37,6 +37,8 @@ class ProjectController extends Controller
     {
         // Request project data from internal API
 
+        // $proj = Project::getByBatch("e14");
+
         $data = Project::getGithubData($title);
 
         if($data != null){

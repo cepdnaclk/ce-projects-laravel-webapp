@@ -20,7 +20,7 @@ class CreateProjectsTable extends Migration
             $table->text('description')->nullable();
 
             $table->char('batch',3);         // Ex: E15
-            $table->string('category');             // Ex: 3yp, temporary column TODO: add one to many mapping
+            /*$table->string('category');*/             // Ex: 3yp, temporary column TODO: add one to many mapping
 
             $table->string('repoLink'); // repository url, full
             $table->string('pageLink'); // github page url, full

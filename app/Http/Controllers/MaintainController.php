@@ -139,7 +139,7 @@ class MaintainController extends Controller
                 $p->description = $project['description'];
 
                 $p->batch = $project['batch'];
-                $p->category = $project['category'];
+                //$p->category = $project['category'];
 
                 $p->repoLink = $project['repoLink'];
                 $p->pageLink = $project['pageLink'];
@@ -162,6 +162,10 @@ class MaintainController extends Controller
 
                 $status = $p->save();
 
+
+                $p->categories()->attach($category->id);
+
+
                 echo $project['title'] . " - $status <br>";
             }
             //echo $response->getContent();
@@ -173,15 +177,18 @@ class MaintainController extends Controller
 
     }
 
-    public
-    function test()
+    public function test()
     {
-        echo Project::getBrowserLink("My Sample Project");
+        $proj = Project::getByBatch("e16");
+
+        foreach ($proj as $p) {
+            echo $p->title."<br>";
+        }
+
 
     }
 
-    public
-    function github()
+    public function github()
     {
 
         $d = [];

@@ -15,6 +15,17 @@ class Project extends Model
         return $this->belongsToMany(Category::class);
     }
 
+    public function categories()
+    {
+        return $this->hasMany(Category::class);
+    }
+
+
+    public static function getByBatch($batch){
+
+        return Project::where('batch', $batch)->get();
+    }
+
     public static function getBrowserLink($title)
     {
         // TODO: need to check for duplicates

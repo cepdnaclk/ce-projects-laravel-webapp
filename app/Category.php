@@ -18,6 +18,10 @@ class Category extends Model
         return $this->hasMany(Project::class);
     }
 
+    public function projects()
+    {
+        return $this->hasMany(Project::class);
+    }
 
     public static function getGithubData()
     {
