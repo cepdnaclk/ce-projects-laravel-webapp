@@ -17,10 +17,10 @@ use Illuminate\Support\Facades\Route;
 Auth::routes();
 
 Route::get('/', 'PageController@home')->name('home');
-Route::get('/about', 'PageController@about')->name('about');
-Route::get('/contact', 'PageController@contact')->name('contact');
+Route::get('about', 'PageController@about')->name('about');
+Route::get('contact', 'PageController@contact')->name('contact');
 
-Route::get('dashboard/pages', 'PageController@index')->name('dashboard.pages');
+Route::get('dashboard', 'PageController@index')->name('dashboard.home');
 
 Route::group(['middleware' => 'verified'], function () {
 

@@ -55,11 +55,6 @@ class RepositoryController extends Controller
 
         $repo = GitHub::repo()->show($this->githubOrgName, $title);
 
-        $parts = explode('-', $repo['name']);
-
-        // TODO: Need to format this in better way
-        $repoName = Project::formatTitle(substr($repo['name'], (strlen($parts[0]) + 2 + strlen($parts[1]))));
-
         $contributors = GitHub::api('repo')->contributors($this->githubOrgName, $title);
         $languages = GitHub::api('repo')->languages($this->githubOrgName, $title);
         //$communityProfile = GitHub::api('repo')->communityProfile($this->githubOrgName, $title);
@@ -116,12 +111,15 @@ class RepositoryController extends Controller
             return response()->json(['count' => 0, 'repositories' => []]);
         }
 
+        //return response()->json([$c->filters]);
+
         // Read all the available repositories in the organization
         $allRepos = $this->paginator->fetchAll($this->client->user(), 'repositories', [$this->githubOrgName]);
         $repositories = [];
 
         // Filter with the given list of regex filters
         foreach ($c->filters as $pattern) {
+            //echo $pattern."<br>";
 
             $filtered = collect($allRepos)->filter(function ($value, $key) use ($pattern) {
                 return preg_match("/" . $pattern . "/", $value['name']);
@@ -139,16 +137,22 @@ class RepositoryController extends Controller
                 'count' => count($repositories),
                 'repositories' => $repositories]
         );
+
     }
 
     private function filterRepo($repo)
     {
         $parts = explode('-', $repo['name']);
-        $repoName = substr($repo['name'], (strlen($parts[0]) + 2 + strlen($parts[1])));
+
+        // TODO: Need to format this in better way
+        $title = Project::formatTitle(substr($repo['name'], (strlen($parts[0]) + 2 + strlen($parts[1]))));
+
+        $repoName = strtolower(substr($repo['name'], (strlen($parts[0]) + 2 + strlen($parts[1]))));
 
         return [$repo['name'] => [
-            'name' => $repoName,
-            'fullName' => $repo['name'],
+            'title' => $title,
+            'name' => $parts[0]."-".$repoName,
+            'full_name' => $repo['name'],
             'description' => $repo['description'],
             'batch' => $parts[0],
             'category' => $parts[1],
@@ -165,8 +169,8 @@ class RepositoryController extends Controller
             'watchers' => $repo['watchers'],
             'stars' => $repo['stargazers_count'],
 
-            'created_at' => date_format(date_create($repo['created_at']), "Y/m/d"),
-            'updated_at' => date_format(date_create($repo['updated_at']), "Y/m/d h:i:s"),
+            'repo_created' => date_format(date_create($repo['created_at']), "Y-m-d"),
+            'repo_updated' => date_format(date_create($repo['updated_at']), "Y-m-d h:i:s"),
             'default_branch' => $repo['default_branch'],
         ]];
     }

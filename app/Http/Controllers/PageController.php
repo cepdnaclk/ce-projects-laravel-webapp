@@ -14,7 +14,7 @@ class PageController extends Controller
     public function index()
     {
         $this->middleware('auth');
-        return view('dashboard.pages');
+        return view('dashboard.home');
     }
 
 

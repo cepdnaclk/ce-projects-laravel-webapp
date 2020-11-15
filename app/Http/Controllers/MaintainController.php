@@ -13,14 +13,20 @@ use Illuminate\Http\Request;
 
 use Github\ResultPager;
 use GrahamCampbell\GitHub\GitHubManager;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class MaintainController extends Controller
 {
 
     protected $githubOrgName = "cepdnaclk";
     protected $githubPage = "https://cepdnaclk.github.io/";
-    protected $baseRepository = "http://nuwanj.github.io/ce-projects-data-repository/";
+
+    //protected $baseRepository = "https://cepdnaclk.github.io/projects";
+    protected $baseRepository = "https://nuwanj.github.io/ce-projects-data-repository";
+
+    protected $categoryURL = "https://cepdnaclk.github.io/projects/data/categories";
 
     protected $client;
     protected $paginator;
@@ -30,105 +36,152 @@ class MaintainController extends Controller
         $this->client = $manager->connection();
         $this->paginator = new \Github\ResultPager($this->client);
 
-        $this->middleware('auth');
+        //$this->middleware('auth');
 
     }
 
     public function updateCategories()
     {
-        $url = $this->baseRepository . "data/categories/list.json";
+        $url = $this->baseRepository . "/data/categories/list.json";
 
         $client = new \GuzzleHttp\Client();
-        $response = $client->request('GET', $url);
-        $data = json_decode($response->getBody(), true);
 
-        if ($response->getStatusCode() != 200 || $data != null) {
+        try {
+            $response = $client->request('GET', $url);
 
-            //DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-            Category::truncate(); // clear the table
+            if ($response->getStatusCode() == 200) {
 
-            foreach ($data as $key => $category) {
-                // fetch each project, one by one and add to the categories table
-                $categoryURL = $this->baseRepository . "data/categories/" . $key . "/index.json";
-                $response = $client->request('GET', $categoryURL);
-                $catData = json_decode($response->getBody(), true);
+                $data = json_decode($response->getBody(), true);
 
-                if ($catData != null) {
+                //DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+                Category::truncate(); // clear the table
 
-                    // TODO: Need to run validator before create
+                //dd($data);
 
-                    $c = new Category();
-                    $c->title = $catData['title'];
-                    $c->category_code = $catData['code'];
-                    $c->desc = $catData['description'];
-                    $c->cover_image = $catData['images']['cover'];
-                    $c->save();
-                    echo "$key: success<br>";
-                } else {
-                    echo "$key: not found<br>";
+                foreach ($data as $key => $category) {
+                    // fetch each project, one by one and add to the categories table
+                    $categoryURL = $this->baseRepository . "/data/categories/" . $key . "/index.json";
+                    $response = $client->request('GET', $categoryURL);
+                    $catData = json_decode($response->getBody(), true);
+
+                    print_r($catData);
+                    print "<br>";
+
+
+                    if ($catData != null) {
+
+                        // TODO: Need to run validator before create
+
+                        /*$catData = request()->validate([
+                            'title' => 'required',
+                            'code' => [
+                                'required',
+                                Rule::unique('categories')],
+                            'description'=>'nullable',
+
+                            'images.cover'=>'nullable',
+                            'images.thumbnail'=>'nullable',
+
+                            'filters' => 'array',
+                            'contact' => 'email|nullable'
+                        ]);*/
+
+                        $c = new Category();
+                        $c->title = $catData['title'];
+                        $c->category_code = $catData['code'];
+                        $c->description = $catData['description'];
+                        $c->cover_image = $catData['images']['cover'];
+                        $c->thumb_image = $catData['images']['thumbnail'];
+                        $c->filters = $catData['filters'];
+                        $c->contact = $catData['contact'];
+                        $c->save();
+
+                        echo "$key:<br>";
+                        echo (json_encode($catData)) . "<br>";
+
+                    } else {
+                        echo "$key: $categoryURL not found or invalid<br>";
+                    }
                 }
+
+            } else {
+                echo "file not found";
             }
-        } else {
-            echo "file not found";
+            //dd($data);
+
+        } catch (Exception $e) {
+            echo 'Message: ' . $e->getMessage();
+
         }
 
-        //dd($data);
 
     }
 
     public function updateProjects()
     {
-        $url = $this->baseRepository . "data/projects/list.json";
+        $categories = Category::all();
+        Project::truncate();
 
-        $client = new \GuzzleHttp\Client();
-        $response = $client->request('GET', $url);
-        $data = json_decode($response->getBody(), true);
+        foreach ($categories as $category) {
+            $category_code = $category->category_code;
 
-        if ($response->getStatusCode() != 200 || $data != null) {
+            $request = Request::create(route('api.repository.filter', $category_code), 'GET');
+            $response = Route::dispatch($request);
+            $data = json_decode($response->getContent(), true);
 
-            //DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-            Project::truncate(); // clear the table
+            foreach ($data['repositories'] as $key => $project) {
+                // TODO: require some validation
 
-            foreach ($data as $key => $project) {
-                // fetch each project, one by one and add to the projects table
+                $p = new Project();
 
-                $projectURL = $this->baseRepository . "data/projects/" . $key . "/index.json";
-                $response = $client->request('GET', $projectURL);
-                $projectData = json_decode($response->getBody(), true);
+                $p->title = $project['title'];
+                $p->name = $project['name'];
+                $p->description = $project['description'];
 
-                if ($projectData != null) {
+                $p->batch = $project['batch'];
+                $p->category = $project['category'];
 
-                    // TODO: Need to run validator before create
+                $p->repoLink = $project['repoLink'];
+                $p->pageLink = $project['pageLink'];
 
-                    $c = new Project();
-                    $c->title = $projectData['title'];
-                    $c->desc = $projectData['description'];
-                    $c->repository = $projectData['url'];
-                    $c->link = Project::getBrowserLink($projectData['title']);
-                    $c->image = $projectData['images']['cover'];
-                    $c->repository = $projectData['batch'];
-                    $c->repository = 'ON_GOING';
-                    $c->repository = $projectData['lastUpdate'];
-                    $c->save();
+                $p->has_pages = $project['has_pages'];
+                $p->has_wiki = $project['has_wiki'];
+                $p->private = $project['private'];
 
-                    echo "$key: success<br>";
-                } else {
-                    echo "$key: failed<br>";
-                }
+                $p->language = $project['language'];
+
+                $p->forks = $project['forks'];
+                $p->watchers = $project['watchers'];
+                $p->stars = $project['stars'];
+
+                $p->image = '';
+
+                //$p->repo_created = $project['repo_created'];
+                //$p->repo_updated = $project['repo_updated'];
+                $p->default_branch = $project['default_branch'];
+
+                $status = $p->save();
+
+                echo $project['title'] . " - $status <br>";
             }
+            //echo $response->getContent();
 
-        } else {
-            echo "failed: " . $response->getStatusCode() . "<br>" . $response->getBody();
         }
+
+
+        //dd($categories);
+
     }
 
-    public function test()
+    public
+    function test()
     {
         echo Project::getBrowserLink("My Sample Project");
 
     }
 
-    public function github()
+    public
+    function github()
     {
 
         $d = [];
