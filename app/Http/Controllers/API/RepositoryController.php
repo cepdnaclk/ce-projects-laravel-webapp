@@ -55,20 +55,9 @@ class RepositoryController extends Controller
 
         $repo = GitHub::repo()->show($this->githubOrgName, $title);
 
-        $contributors = GitHub::api('repo')->contributors($this->githubOrgName, $title);
-        $languages = GitHub::api('repo')->languages($this->githubOrgName, $title);
-        //$communityProfile = GitHub::api('repo')->communityProfile($this->githubOrgName, $title);
 
-        $contributorArray = collect($contributors)->map(function ($contributor) {
-            return [
-                'username' => $contributor['login'],
-                'avatar' => $contributor['avatar_url'],
-                /*'name' => $contributor['name'],*/
-                'url' => $contributor['html_url'],
-                /*'data' => $contributor,*/
-            ];
-        });
-
+        $languages = $this->getRepoLanguages($title);
+        $contributorArray = $this->getRepoContributors($title);
 
         // Contributors:  https://api.github.com/repos/nuwanj/FYP-simulator-gui/contributors
         //      avatar_url, html_url, login, contributions
@@ -84,26 +73,20 @@ class RepositoryController extends Controller
         //      https://docs.github.com/en/free-pro-team@latest/rest/reference/search
         //      https://docs.github.com/en/free-pro-team@latest/rest/reference/search#constructing-a-search-query
 
-
         $resp = $this->filterRepo($repo);
+        $name = $repo['name'];
 
-        $resp['contributors'] = [
+        $resp[$name]['contributors'] = [
             'count' => count($contributorArray),
             'list' => $contributorArray
         ];
-        $resp['languages'] = [
-            'main' => $repo['language'],
-            'count' => count($languages),
-            'total' => array_sum($languages),
-            'list' => $languages
-        ];
+        $resp[$name]['languages'] = $languages;
 
-        return response()->json($resp);
+        return response()->json($resp[$name]);
     }
 
     public function categoryIndex($category_code)
     {
-
         $c = Category::where('category_code', $category_code)->first();
 
         if ($c == null) {
@@ -146,19 +129,26 @@ class RepositoryController extends Controller
 
         // TODO: Need to format this in better way
         $title = Project::formatTitle(substr($repo['name'], (strlen($parts[0]) + 2 + strlen($parts[1]))));
+        $repoName = (substr($repo['name'], (strlen($parts[0]) + 2 + strlen($parts[1]))));
 
-        $repoName = strtolower(substr($repo['name'], (strlen($parts[0]) + 2 + strlen($parts[1]))));
+        if ($repo['has_pages']) {
+            $pageLink = ("https://" . $this->githubOrgName . ".github.io/" . $repo['name']);
+            $imgLink = $pageLink . "/img_cover.jpg";
+
+            $imgLink = ($this->fileExists($imgLink)) ? $imgLink : '';
+        }
 
         return [$repo['name'] => [
             'title' => $title,
-            'name' => $parts[0]."-".$repoName,
+            'name' => $parts[0] . "-" . $repoName,
             'full_name' => $repo['name'],
             'description' => $repo['description'],
             'batch' => $parts[0],
             'category' => $parts[1],
 
             'repoLink' => $repo['html_url'],
-            'pageLink' => $repo['has_pages'] ? ("https://" . $this->githubOrgName . ".github.io/" . $repo['name']) : '',
+            'pageLink' => ($repo['has_pages']) ? $pageLink : '',
+            'coverImgLink' => ($repo['has_pages']) ? $imgLink : '',
 
             'has_pages' => $repo['has_pages'],
             'has_wiki' => $repo['has_wiki'],
@@ -175,5 +165,44 @@ class RepositoryController extends Controller
         ]];
     }
 
+    private function fileExists($url)
+    {
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_NOBODY, true);
+        curl_exec($ch);
+        $responseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
 
+        return ($responseCode == 200);
+    }
+
+    public function getRepoContributors($title)
+    {
+        $contributors = GitHub::api('repo')->contributors($this->githubOrgName, $title);
+        return collect($contributors)->map(function ($contributor) {
+            return [
+                'username' => $contributor['login'],
+                'avatar' => $contributor['avatar_url'],
+                /*'name' => $contributor['name'],*/
+                'url' => $contributor['html_url'],
+                /*'data' => $contributor,*/
+            ];
+        })->toArray();
+    }
+
+    public function getRepoLanguages($title)
+    {
+        try {
+            $lang = GitHub::api('repo')->languages($this->githubOrgName, $title);
+
+            return [
+                'count' => count($lang),
+                'total' => array_sum($lang),
+                'list' => $lang
+            ];
+
+        } catch (Exception $e) {
+            return [];
+        }
+    }
 }

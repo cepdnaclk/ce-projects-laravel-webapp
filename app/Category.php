@@ -14,14 +14,11 @@ class Category extends Model
         'filters' => 'array'
     ];
 
-    function getProjects($batch_id){
-        return $this->hasMany(Project::class);
-    }
-
     public function projects()
     {
-        return $this->hasMany(Project::class);
+        return $this->belongsToMany(Project::class, 'category_project');
     }
+
 
     public static function getGithubData()
     {

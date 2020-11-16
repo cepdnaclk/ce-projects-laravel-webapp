@@ -35,28 +35,14 @@ class ProjectController extends Controller
 
     public function show($title)
     {
-        // Request project data from internal API
+        $project = Project::where('name', $title)->first();
+        if ($project == null) return \Response::view('errors.404', [], 404);
 
-        // $proj = Project::getByBatch("e14");
-
-        $data = Project::getGithubData($title);
-
-        if($data != null){
-            return view('project.view', compact(['title', 'data']));
-        }else{
-            return \Response::view('errors.500',[],500);
-        }
-    }
+        $langData = $project->getLanguages();
+        $contributorData = $project->getContributors();
+        return view('project.view', compact(['title', 'project', 'langData', 'contributorData']));
 
 
-    public function showBC_Project($batch_id, $category_title)
-    {
-        return view('project.view', compact(['batch_id', 'category_title']));
-    }
-
-    public function showCB_Project($category_title, $batch_id)
-    {
-        return view('project.view', compact(['batch_id', 'category_title']));
     }
 
     public function edit(Project $project)

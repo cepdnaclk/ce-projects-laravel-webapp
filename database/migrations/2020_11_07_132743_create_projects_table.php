@@ -17,10 +17,12 @@ class CreateProjectsTable extends Migration
             $table->id();
             $table->string('title');                // Actual project name
             $table->string('name')->unique();       // This is used to show in the URL
+            $table->text('repo_name');
+
             $table->text('description')->nullable();
 
             $table->char('batch',3);         // Ex: E15
-            /*$table->string('category');*/             // Ex: 3yp, temporary column TODO: add one to many mapping
+            $table->string('main_category');             // Ex: 3yp, temporary column
 
             $table->string('repoLink'); // repository url, full
             $table->string('pageLink'); // github page url, full

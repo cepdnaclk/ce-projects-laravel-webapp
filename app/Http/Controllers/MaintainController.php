@@ -26,7 +26,7 @@ class MaintainController extends Controller
     //protected $baseRepository = "https://cepdnaclk.github.io/projects";
     protected $baseRepository = "https://nuwanj.github.io/ce-projects-data-repository";
 
-    protected $categoryURL = "https://cepdnaclk.github.io/projects/data/categories";
+    //protected $categoryURL = "https://cepdnaclk.github.io/projects/data/categories";
 
     protected $client;
     protected $paginator;
@@ -64,6 +64,10 @@ class MaintainController extends Controller
                     $response = $client->request('GET', $categoryURL);
                     $catData = json_decode($response->getBody(), true);
 
+                    // TODO: Validate the exist of images
+                    $coverURL = $this->baseRepository . "/data/categories/" . $key . "/". $catData['images']['cover'];
+                    $thumbURL = $this->baseRepository . "/data/categories/" . $key . "/". $catData['images']['thumbnail'];
+
                     print_r($catData);
                     print "<br>";
 
@@ -90,8 +94,8 @@ class MaintainController extends Controller
                         $c->title = $catData['title'];
                         $c->category_code = $catData['code'];
                         $c->description = $catData['description'];
-                        $c->cover_image = $catData['images']['cover'];
-                        $c->thumb_image = $catData['images']['thumbnail'];
+                        $c->cover_image = $coverURL;
+                        $c->thumb_image = $thumbURL;
                         $c->filters = $catData['filters'];
                         $c->contact = $catData['contact'];
                         $c->save();
@@ -120,7 +124,7 @@ class MaintainController extends Controller
     public function updateProjects()
     {
         $categories = Category::all();
-        Project::truncate();
+        Project::deleteAll();
 
         foreach ($categories as $category) {
             $category_code = $category->category_code;
@@ -136,10 +140,12 @@ class MaintainController extends Controller
 
                 $p->title = $project['title'];
                 $p->name = $project['name'];
+                $p->repo_name = $project['full_name'];
+
                 $p->description = $project['description'];
 
                 $p->batch = $project['batch'];
-                //$p->category = $project['category'];
+                $p->main_category = $project['category'];
 
                 $p->repoLink = $project['repoLink'];
                 $p->pageLink = $project['pageLink'];
@@ -154,7 +160,8 @@ class MaintainController extends Controller
                 $p->watchers = $project['watchers'];
                 $p->stars = $project['stars'];
 
-                $p->image = '';
+                // Find for repository own image. If there isn't, use the default one
+                $p->image = ($project['coverImgLink'] != "" ) ? $project['coverImgLink'] : $category->cover_image;
 
                 //$p->repo_created = $project['repo_created'];
                 //$p->repo_updated = $project['repo_updated'];
@@ -179,12 +186,11 @@ class MaintainController extends Controller
 
     public function test()
     {
-        $proj = Project::getByBatch("e16");
+        /*$proj = Project::getByBatch("e16");
 
         foreach ($proj as $p) {
             echo $p->title."<br>";
-        }
-
+        }*/
 
     }
 

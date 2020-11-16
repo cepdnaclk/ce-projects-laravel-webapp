@@ -1,11 +1,89 @@
 @extends('layouts.public')
 
-@section('title',"Categories")
+@section('title', $category->title)
 
 @section('content')
     <div class="p-3">
 
-        This will render an individual category, with projects
+        <div class="row">
+            <div class="col-md-2">
+                <h3>{{ $category->title }}</h3>
+
+                @if($batches != null)
+                    <div class="container m-0 p-0">
+                        <div class="p-1"><a href="{{ route('home') }}">Back</a> | {{ $project_count }} Projects</div>
+                        <hr>
+
+                        Filter Projects by:
+
+                        <ul class="list-group">
+                            @foreach($batches as $key=>$value)
+                                <li class="list-group-item p-1 align-items-center">
+                                    <a href="{{ route('category.batch', [$category->category_code, $key]) }}"
+                                       class="d-flex justify-content-between">
+                                        <span class="mx-2">{{ $key }} Batch</span>
+                                        <span
+                                            class="d-none mx-2 badge badge-secondary badge-pill">{{ $value->count() }}</span>
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @else
+                    <div class="p-1"><a href="{{ route('category.show', $category->category_code) }}">Back</a>
+                        | {{ $project_count }} Projects
+                    </div>
+                    <hr>
+                    Projects by <b>{{ $subtitle }}</b> batch
+                    <br><br>
+                @endif
+            </div>
+
+            <div class="col-md-10">
+
+                <div class="d-none row">
+                    <!-- Preview Image -->
+                    <div class="container">
+                        <img class="img-fluid rounded" src="http://placehold.it/900x300" alt="">
+                    </div>
+                </div>
+
+                <div class="container p-3 mw-100">
+                    <div class="row">
+
+                        @if($projects->count() > 0)
+
+                            @foreach($projects->shuffle() as $proj)
+                                <div class="col-lg-3 col-md-6 d-flex">
+                                    <a class="btn" href="{{ route("project.show", $proj->name) }}">
+                                        <div class="card h-100 m-0">
+                                            <img class="card-img-top" src="{{ $category->thumb_image }}" alt="">
+                                            <div class="card-body p-0 m-1">
+                                                <p class="card-title">{{ $proj->title }} ({{ $proj->batch }})</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            @endforeach
+                        @else
+
+                            <div class="text-center p-5" style="width: 100%;">
+                                <h3>No projects available<br><small>Please come back later</small></h3>
+                            </div>
+
+                        @endif
+                    </div>
+                </div>
+                @if($batches != null)
+                    <div class="container my-4 d-flex justify-content-center">
+                        {{ $projects->links() }}
+                    </div>
+                @endif
+
+            </div>
+
+        </div>
+
 
     </div>
 

@@ -2,6 +2,8 @@
 
 namespace App;
 
+use GrahamCampbell\GitHub\Facades\GitHub;
+use Http\Client\Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -10,19 +12,21 @@ class Project extends Model
 {
     // protected $guarded = [];
 
-    public function getCategories()
+
+    // Return the main category of the project
+    public function getMainCategory()
+    {
+        return $this->main_category;
+    }
+
+    // Get a list of categories that the project is registered
+    public function categories()
     {
         return $this->belongsToMany(Category::class);
     }
 
-    public function categories()
+    public static function getByBatch($batch)
     {
-        return $this->hasMany(Category::class);
-    }
-
-
-    public static function getByBatch($batch){
-
         return Project::where('batch', $batch)->get();
     }
 
@@ -43,6 +47,22 @@ class Project extends Model
     }
 
 
+    public function getLanguages()
+    {
+        $request = Request::create(route('api.repository.languages', $this->repo_name), 'GET');
+        $response = Route::dispatch($request);
+        $data = json_decode($response->getContent(), true);
+
+        return $data;
+    }
+    public function getContributors(){
+        $request = Request::create(route('api.repository.contributors', $this->repo_name), 'GET');
+        $response = Route::dispatch($request);
+        $data = json_decode($response->getContent(), true);
+
+        return $data;
+    }
+
     public static function formatTitle($link_title)
     {
         $smallwordsarray = array(
@@ -59,6 +79,15 @@ class Project extends Model
         $newtitle = ucfirst(implode(' ', $words));
 
         return $newtitle;
+    }
+
+    public static function deleteAll()
+    {
+        $base = Project::all();
+        $base->each(function ($item, $key) {
+            $item->categories()->detach();
+            $item->delete();
+        });
     }
 
 }

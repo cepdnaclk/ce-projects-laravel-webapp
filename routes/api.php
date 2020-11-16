@@ -18,8 +18,13 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::get('repository/{title}/languages', 'API\RepositoryController@getRepoLanguages')->name('api.repository.languages');
+Route::get('repository/{title}/contributors', 'API\RepositoryController@getRepoContributors')->name('api.repository.contributors');
+
 
 Route::get('repository/{title}', 'API\RepositoryController@show')->name('api.repository.show');
 Route::get('repositories/', 'API\RepositoryController@index')->name('api.repository.index');
 Route::get('repositories/{category_code}', 'API\RepositoryController@categoryIndex')->name('api.repository.filter');
+
+
 

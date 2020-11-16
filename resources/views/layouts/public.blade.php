@@ -32,7 +32,7 @@
 
     @include('includes.navibar')
 
-    <main class="py-4 p-1">
+    <main class="py-2 p-1">
         <br>
         @yield('content')
     </main>
