@@ -15,10 +15,13 @@ class CreateCategoriesTable extends Migration
     {
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
             $table->string('category_code')->unique();        // Ex: FYP, 3YP
-            $table->text('desc');
+            $table->string('title');
+            $table->text('description');
             $table->string('cover_image')->nullable();
+            $table->string('thumb_image')->nullable();
+            $table->json('filters')->nullable();
+            $table->text('contact')->nullable();
             $table->timestamps();
         });
     }

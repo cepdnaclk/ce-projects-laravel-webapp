@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
+use Illuminate\Support\Facades\Redirect;
 
 class DocsController extends Controller
 {
@@ -26,8 +27,12 @@ class DocsController extends Controller
     public function page($title){
 
         if(isset($this->pages[$title])){
+
             $data = $this->pages[$title];
             return view('docs.page', compact('data'));
+
+            //$url = $this->pages['github_projects']['link']."$title";
+            //return Redirect::away($url);
 
         }else{
             //not found

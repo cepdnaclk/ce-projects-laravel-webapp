@@ -10,8 +10,13 @@ class Category extends Model
 {
     // protected $guarded = [];
 
-    function getProjects($batch_id){
-        return $this->hasMany(Project::class);
+    protected $casts = [
+        'filters' => 'array'
+    ];
+
+    public function projects()
+    {
+        return $this->belongsToMany(Project::class, 'category_project');
     }
 
 
