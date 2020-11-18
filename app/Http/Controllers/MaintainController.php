@@ -20,13 +20,8 @@ use Illuminate\Validation\Rule;
 class MaintainController extends Controller
 {
 
-    protected $githubOrgName = "cepdnaclk";
-    protected $githubPage = "https://cepdnaclk.github.io/";
-
     //protected $baseRepository = "https://cepdnaclk.github.io/projects";
     protected $baseRepository = "https://nuwanj.github.io/ce-projects-data-repository";
-
-    //protected $categoryURL = "https://cepdnaclk.github.io/projects/data/categories";
 
     protected $client;
     protected $paginator;
@@ -37,58 +32,41 @@ class MaintainController extends Controller
         $this->paginator = new \Github\ResultPager($this->client);
 
         //$this->middleware('auth');
-
     }
 
     public function updateCategories()
     {
         $url = $this->baseRepository . "/data/categories/list.json";
-
         $client = new \GuzzleHttp\Client();
 
         try {
             $response = $client->request('GET', $url);
+            $resp = [];
 
             if ($response->getStatusCode() == 200) {
-
                 $data = json_decode($response->getBody(), true);
-
-                //DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-                Category::truncate(); // clear the table
-
-                //dd($data);
+                Category::truncate();
 
                 foreach ($data as $key => $category) {
-                    // fetch each project, one by one and add to the categories table
+                    // fetch each category, one by one and add to the categories table
+
                     $categoryURL = $this->baseRepository . "/data/categories/" . $key . "/index.json";
                     $response = $client->request('GET', $categoryURL);
                     $catData = json_decode($response->getBody(), true);
 
-                    // TODO: Validate the exist of images
                     $coverURL = $this->baseRepository . "/data/categories/" . $key . "/" . $catData['images']['cover'];
                     $thumbURL = $this->baseRepository . "/data/categories/" . $key . "/" . $catData['images']['thumbnail'];
 
-                    print_r($catData);
-                    print "<br>";
-
+                    if ($this->fileExists($coverURL) == false) {
+                        $coverURL = $this->baseRepository . "/data/categories/template/cover_page.jpg";
+                    }
+                    if ($this->fileExists($thumbURL) == false) {
+                        $thumbURL = $this->baseRepository . "/data/categories/template/thumbnail.jpg.jpg";
+                    }
 
                     if ($catData != null) {
 
                         // TODO: Need to run validator before create
-
-                        /*$catData = request()->validate([
-                            'title' => 'required',
-                            'code' => [
-                                'required',
-                                Rule::unique('categories')],
-                            'description'=>'nullable',
-
-                            'images.cover'=>'nullable',
-                            'images.thumbnail'=>'nullable',
-
-                            'filters' => 'array',
-                            'contact' => 'email|nullable'
-                        ]);*/
 
                         $c = new Category();
                         $c->title = $catData['title'];
@@ -101,31 +79,30 @@ class MaintainController extends Controller
                         $c->contact = $catData['contact'];
                         $c->save();
 
-                        echo "$key:<br>";
-                        echo (json_encode($catData)) . "<br>";
+                        $resp[$key] = $catData;
 
                     } else {
-                        echo "$key: $categoryURL not found or invalid<br>";
+                        $resp[$key] = ["error" => "$categoryURL not found"];
                     }
                 }
 
             } else {
-                echo "file not found";
+                $resp = ["error" => "file not found"];
             }
-            //dd($data);
+
+            return response()->json($resp);
 
         } catch (Exception $e) {
             echo 'Message: ' . $e->getMessage();
 
         }
-
-
     }
 
     public function updateProjects()
     {
         $categories = Category::all();
         Project::deleteAll();
+        $resp = [];
 
         foreach ($categories as $category) {
             $category_code = $category->category_code;
@@ -135,6 +112,7 @@ class MaintainController extends Controller
             $data = json_decode($response->getContent(), true);
 
             foreach ($data['repositories'] as $key => $project) {
+
                 // TODO: require some validation
 
                 $p = new Project();
@@ -174,34 +152,28 @@ class MaintainController extends Controller
 
                 $p->categories()->attach($category->id);
 
-                echo $project['title'] . " - $status <br>";
+                $resp[$category_code][$project['title']] = $p;
             }
-            //echo $response->getContent();
-
         }
 
-
-        //dd($categories);
-
-    }
-
-    public function test()
-    {
-        /*$proj = Project::getByBatch("e16");
-
-        foreach ($proj as $p) {
-            echo $p->title."<br>";
-        }*/
+        return response()->json($resp);
 
     }
 
-    public function github()
+    public static function test(){
+
+        Project::find(428)->syncProject();
+    }
+
+
+    private function fileExists($url)
     {
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_NOBODY, true);
+        curl_exec($ch);
+        $responseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
 
-        $d = [];
-
-        //print($repositories);
-        dd($d);
-
+        return ($responseCode == 200);
     }
 }

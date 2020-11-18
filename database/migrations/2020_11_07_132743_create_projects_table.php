@@ -43,6 +43,9 @@ class CreateProjectsTable extends Migration
 
             //$table->enum('status', ['ON_GOING', 'COMPLETED'])->default('ON_GOING');
 
+            $table->json('languageData')->nullable();
+            $table->json('contributorData')->nullable();
+
             $table->dateTime('repo_created')->nullable();
             $table->dateTime('repo_updated')->nullable();
             $table->string('default_branch')->nullable();

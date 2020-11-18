@@ -14,6 +14,22 @@ class RepositoryController extends Controller
 {
     protected $githubOrgName;
 
+
+    // Contributors:  https://api.github.com/repos/nuwanj/FYP-simulator-gui/contributors
+    //      avatar_url, html_url, login, contributions
+
+    // Languages:  https://api.github.com/repos/nuwanj/FYP-simulator-gui/languages
+    //      list of languages used
+
+    // User: https://api.github.com/users/{username}
+    //
+
+    // Search: https://api.github.com/search/code?q=arduino+:cepdnaclk
+    // Search: https://api.github.com/search/repository?q=arduino+org:cepdnaclk
+    //      https://docs.github.com/en/free-pro-team@latest/rest/reference/search
+    //      https://docs.github.com/en/free-pro-team@latest/rest/reference/search#constructing-a-search-query
+
+
     public function __construct(GitHubManager $manager)
     {
         $this->client = $manager->connection();
@@ -21,86 +37,51 @@ class RepositoryController extends Controller
         $this->githubOrgName = env('GITHUB_ORGANIZATION');
     }
 
-    public function index()
+    public function index($organization)
     {
-        // Ex: http://ce-projects.nuwanjaliyagoda.com/api/repositories
+        // Ex: http://projects.ce.pdn.ac.lk/api/repositories/{organization}
 
-        $allRepos = $this->paginator->fetchAll($this->client->user(), 'repositories', [$this->githubOrgName]);
+        $allRepos = $this->paginator->fetchAll($this->client->user(), 'repositories', [$organization]);
 
-        //  Filter: e{batch}-{tag}-
-        $pattern = "/^e\d{2}-\w*-/";// "/e\d{2}/";
+        if ($allRepos == null) return [];
 
-        // Can use this link to check the functionality of RegEx expressions: https://regexr.com/
-
-        // Filter the repositories  by regex filter
-        $filtered = collect($allRepos)->filter(function ($value, $key) use ($pattern) {
-            return preg_match($pattern, $value['name']);
-        });
-
-        $repositories = $filtered->mapWithKeys(function ($repo) {
-            // This will filter out unwanted parameters from the repository list
-            return $this->filterRepo($repo);
-        });
-
-        //print($repositories);
         return response()->json([
-            'count' => count($repositories),
-            'repositories' => $repositories]);
+            'count' => count($allRepos),
+            'repositories' => $allRepos]);
     }
 
+    // Show a specific repository
     public function show($organization, $title)
     {
-        // Ex: http://ce-projects.nuwanjaliyagoda.com/api/repository/{{organization}}/{{title}}/
+        // Ex: http://projects.ce.pdn.ac.lk/api/repository/{{organization}}/{{title}}/
 
         $repo = GitHub::repo()->show($organization, $title);
-        $organization = $repo['owner']['login'];
 
+        $organization = $repo['owner']['login'];
         $languages = $this->getRepoLanguages($organization, $title);
         $contributorArray = $this->getRepoContributors($organization, $title);
 
-        // Contributors:  https://api.github.com/repos/nuwanj/FYP-simulator-gui/contributors
-        //      avatar_url, html_url, login, contributions
+        $resp = $this->prepareRepository($repo)[$repo['name']];
+        $resp['contributors'] = ['count' => count($contributorArray), 'list' => $contributorArray];
+        $resp['languages'] = $languages;
 
-        // Languages:  https://api.github.com/repos/nuwanj/FYP-simulator-gui/languages
-        //      list of languages used
-
-        // User: https://api.github.com/users/{username}
-        //
-
-        // Search: https://api.github.com/search/code?q=arduino+:cepdnaclk
-        // Search: https://api.github.com/search/repository?q=arduino+org:cepdnaclk
-        //      https://docs.github.com/en/free-pro-team@latest/rest/reference/search
-        //      https://docs.github.com/en/free-pro-team@latest/rest/reference/search#constructing-a-search-query
-
-        $resp = $this->filterRepo($repo);
-        $name = $repo['name'];
-
-        $resp[$name]['contributors'] = [
-            'count' => count($contributorArray),
-            'list' => $contributorArray
-        ];
-        $resp[$name]['languages'] = $languages;
-
-        return response()->json($resp[$name]);
+        return response()->json($resp);
     }
 
-    public function categoryIndex($category_code)
+    public function categoryFilter($category_code)
     {
+        // Ex: Ex: http://projects.ce.pdn.ac.lk/repositories/filter/{category_code}
+
         $c = Category::where('category_code', $category_code)->first();
 
-        if ($c == null) {
-            // If the category_code is not in the database
+        if ($c == null) { // If the category_code is not in the database
             return response()->json(['count' => 0, 'repositories' => []]);
         }
 
-        //return response()->json([$c->filters]);
-
-        // Read all the available repositories in the organization
         $repositories = [];
 
-        // Filter with the given list of regex filters
         foreach ($c->filters as $pattern) {
-            //echo $pattern."<br>";
+            // Filter with the given list of regex filters
 
             $allRepos = $this->paginator->fetchAll($this->client->user(), 'repositories', [$pattern['organization']]);
 
@@ -110,7 +91,7 @@ class RepositoryController extends Controller
 
             $newRepositories = $filtered->mapWithKeys(function ($repo) {
                 // This will filter out unwanted parameters from the repository list
-                return $this->filterRepo($repo);
+                return $this->prepareRepository($repo);
             });
 
             // merge search results
@@ -123,12 +104,13 @@ class RepositoryController extends Controller
 
     }
 
-    private function filterRepo($repo)
+    private function prepareRepository($repo)
     {
         $parts = explode('-', $repo['name']);
         $organization = $repo['owner']['login'];
 
         // TODO: Need to format this in better way
+
         if (strtolower(substr($repo['name'], 0, 1)) == "e") {
             // course project
 
@@ -139,14 +121,15 @@ class RepositoryController extends Controller
 
         } else {
             // department project
-            $title = $repo['name'];
+
+            $title = str_replace('-', " ", $repo['name']);
             $repoName = $repo['name'];
             $batch = null;
             $mainCategory = $parts[0];
         }
 
         if ($repo['has_pages']) {
-            $pageLink = ("https://" . $organization . ".github.io/" . $repo['name']);
+            $pageLink = "https://" . $organization . ".github.io/" . $repo['name'];
             $imgLink = $pageLink . "/img_cover.jpg";
             $imgLink = ($this->fileExists($imgLink)) ? $imgLink : '';
 
@@ -197,22 +180,27 @@ class RepositoryController extends Controller
 
     public function getRepoContributors($organization, $title)
     {
-        // Ex: http://ce-projects.nuwanjaliyagoda.com/api/repository/{{organization}}/{{title}}/contributors
-        $contributors = GitHub::api('repo')->contributors($organization, $title);
-        return collect($contributors)->map(function ($contributor) {
-            return [
-                'username' => $contributor['login'],
-                'avatar' => $contributor['avatar_url'],
-                /*'name' => $contributor['name'],*/
-                'url' => $contributor['html_url'],
-                /*'data' => $contributor,*/
-            ];
-        })->toArray();
+        // Ex: http://projects.ce.pdn.ac.lk/api/repository/{{organization}}/{{title}}/contributors
+        try {
+            $contributors = GitHub::api('repo')->contributors($organization, $title);
+            return collect($contributors)->map(function ($contributor) {
+                return [
+                    'username' => $contributor['login'],
+                    'avatar' => $contributor['avatar_url'],
+                    /*'name' => $contributor['name'],*/
+                    'url' => $contributor['html_url'],
+                    /*'data' => $contributor,*/
+                ];
+            })->toArray();
+        } catch (\Exception $e) {
+            return [];
+        }
     }
 
     public function getRepoLanguages($organization, $title)
     {
-        // Ex: http://ce-projects.nuwanjaliyagoda.com/api/repository/{{organization}}/{{title}}/languages
+        // Ex: http://projects.ce.pdn.ac.lk/api/repository/{{organization}}/{{title}}/languages
+
         try {
             $lang = GitHub::api('repo')->languages($organization, $title);
 
@@ -222,8 +210,12 @@ class RepositoryController extends Controller
                 'list' => $lang
             ];
 
-        } catch (Exception $e) {
-            return [];
+        } catch (\Exception $e) {
+            return [
+                'count' => 0,
+                'total' => 0,
+                'list' => []
+            ];
         }
     }
 }

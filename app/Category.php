@@ -19,6 +19,10 @@ class Category extends Model
         return $this->belongsToMany(Project::class, 'category_project');
     }
 
+    public static function getByCode($category_code)
+    {
+        return Category::where('category_code', $category_code)->first();
+    }
 
     public static function getGithubData()
     {

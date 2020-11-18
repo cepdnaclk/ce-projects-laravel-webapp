@@ -111,15 +111,15 @@
 
                 <!-- Categories Widget -->
 
-                @if($langData)
+                @if($project->languageData)
                     <div class="card my-4 pb-3">
                         <h5 class="card-header">Languages</h5>
                         <div class="card-body">
 
                             <ul class="list-unstyled mb-0">
-                                @foreach($langData['list'] as $key=>$value)
+                                @foreach($project->languageData['list'] as $key=>$value)
                                     @php
-                                        $percentage = 100.0*round( $value/$langData['total'] ,4 );
+                                        $percentage = 100.0*round( $value/$project->languageData['total'] ,4 );
                                     @endphp
 
                                     @if($percentage>0.1)
@@ -132,14 +132,14 @@
                 @endif
 
                 <!-- Side Widget -->
-                @if($contributorData)
+                @if($project->contributorData)
                     <div class="card my-4">
                         <h5 class="card-header">Contributors</h5>
                         <div class="card-body">
                             <ul class="list-unstyled mb-0">
 
 
-                                @foreach($contributorData as $contributor)
+                                @foreach($project->contributorData['list'] as $contributor)
                                     <li><a href="#" target="_blank">[Image] {{ $contributor['username'] }}</a></li>
                                 @endforeach
                             </ul>

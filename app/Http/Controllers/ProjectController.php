@@ -40,9 +40,13 @@ class ProjectController extends Controller
 
         // TODO: Need to override default values, if config file provided by the repository owners
 
-        $langData = $project->getLanguages();
-        $contributorData = $project->getContributors();
-        return view('project.view', compact(['title', 'project', 'langData', 'contributorData']));
+        if($project->syncProject()) {
+            $project = $project->fresh();
+        }
+
+        //$langData = $project->getLanguages();
+        //$contributorData = $project->getContributors();
+        return view('project.view', compact(['title', 'project']));
 
 
     }

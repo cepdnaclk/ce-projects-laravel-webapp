@@ -11,7 +11,10 @@ use Illuminate\Support\Facades\Route;
 class Project extends Model
 {
     // protected $guarded = [];
-
+    protected $casts = [
+        'languageData' => 'array',
+        'contributorData' => 'array'
+    ];
 
     // Return the main category of the project
     public function getMainCategory()
@@ -30,6 +33,30 @@ class Project extends Model
         return Project::where('batch', $batch)->get();
     }
 
+    public static function getByName($proj_name)
+    {
+        return Project::where('name', $proj_name)->first();
+    }
+
+    public function syncProject()
+    {
+
+        $updated = strtotime($this->updated_at);
+        $now = time();
+        $diff = floor(($now - $updated) / 60);
+        $cacheTime = 1; // env('PROJECT_CACHE_TIME');
+
+        // if the difference is greater then $cacheTime, it will automatically update the project details from GitHub
+
+        if ($diff >= $cacheTime || $this->contributorData == null || $this->languageData == null) {
+            $request = Request::create(route('api.update.singleProject', [$this->organization, $this->repo_name]), 'GET');
+            $response = Route::dispatch($request);
+
+            return ($response->getStatusCode() == 200);
+        } else {
+            return 0;
+        }
+    }
 
     public function getGithubData()
     {
@@ -50,8 +77,10 @@ class Project extends Model
 
         return $data;
     }
-    public function getContributors(){
-        $request = Request::create(route('api.repository.contributors',[ $this->organization, $this->repo_name]), 'GET');
+
+    public function getContributors()
+    {
+        $request = Request::create(route('api.repository.contributors', [$this->organization, $this->repo_name]), 'GET');
         $response = Route::dispatch($request);
         $data = json_decode($response->getContent(), true);
 
