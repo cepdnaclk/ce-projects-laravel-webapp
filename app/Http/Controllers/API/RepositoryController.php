@@ -37,7 +37,6 @@ class RepositoryController extends Controller
             return preg_match($pattern, $value['name']);
         });
 
-
         $repositories = $filtered->mapWithKeys(function ($repo) {
             // This will filter out unwanted parameters from the repository list
             return $this->filterRepo($repo);
@@ -49,15 +48,15 @@ class RepositoryController extends Controller
             'repositories' => $repositories]);
     }
 
-    public function show($title)
+    public function show($organization, $title)
     {
-        // Ex: http://ce-projects.nuwanjaliyagoda.com/api/repository/{{title}}
+        // Ex: http://ce-projects.nuwanjaliyagoda.com/api/repository/{{organization}}/{{title}}/
 
-        $repo = GitHub::repo()->show($this->githubOrgName, $title);
+        $repo = GitHub::repo()->show($organization, $title);
+        $organization = $repo['owner']['login'];
 
-
-        $languages = $this->getRepoLanguages($title);
-        $contributorArray = $this->getRepoContributors($title);
+        $languages = $this->getRepoLanguages($organization, $title);
+        $contributorArray = $this->getRepoContributors($organization, $title);
 
         // Contributors:  https://api.github.com/repos/nuwanj/FYP-simulator-gui/contributors
         //      avatar_url, html_url, login, contributions
@@ -97,15 +96,16 @@ class RepositoryController extends Controller
         //return response()->json([$c->filters]);
 
         // Read all the available repositories in the organization
-        $allRepos = $this->paginator->fetchAll($this->client->user(), 'repositories', [$this->githubOrgName]);
         $repositories = [];
 
         // Filter with the given list of regex filters
         foreach ($c->filters as $pattern) {
             //echo $pattern."<br>";
 
+            $allRepos = $this->paginator->fetchAll($this->client->user(), 'repositories', [$pattern['organization']]);
+
             $filtered = collect($allRepos)->filter(function ($value, $key) use ($pattern) {
-                return preg_match("/" . $pattern . "/", $value['name']);
+                return preg_match("/" . $pattern['filter'] . "/", $value['name']);
             });
 
             $newRepositories = $filtered->mapWithKeys(function ($repo) {
@@ -126,29 +126,48 @@ class RepositoryController extends Controller
     private function filterRepo($repo)
     {
         $parts = explode('-', $repo['name']);
+        $organization = $repo['owner']['login'];
 
         // TODO: Need to format this in better way
-        $title = Project::formatTitle(substr($repo['name'], (strlen($parts[0]) + 2 + strlen($parts[1]))));
-        $repoName = (substr($repo['name'], (strlen($parts[0]) + 2 + strlen($parts[1]))));
+        if (strtolower(substr($repo['name'], 0, 1)) == "e") {
+            // course project
+
+            $title = Project::formatTitle(substr($repo['name'], (strlen($parts[0]) + 2 + strlen($parts[1]))));
+            $repoName = $parts[0] . "-" . (substr($repo['name'], (strlen($parts[0]) + 2 + strlen($parts[1]))));
+            $batch = $parts[0];
+            $mainCategory = $parts[1];
+
+        } else {
+            // department project
+            $title = $repo['name'];
+            $repoName = $repo['name'];
+            $batch = null;
+            $mainCategory = $parts[0];
+        }
 
         if ($repo['has_pages']) {
-            $pageLink = ("https://" . $this->githubOrgName . ".github.io/" . $repo['name']);
+            $pageLink = ("https://" . $organization . ".github.io/" . $repo['name']);
             $imgLink = $pageLink . "/img_cover.jpg";
-
             $imgLink = ($this->fileExists($imgLink)) ? $imgLink : '';
+
+            $thumbLink = $pageLink . "/img_thumb.jpg";
+            $thumbLink = ($this->fileExists($thumbLink)) ? $thumbLink : '';
         }
 
         return [$repo['name'] => [
             'title' => $title,
-            'name' => $parts[0] . "-" . $repoName,
+            'name' => $repoName,
             'full_name' => $repo['name'],
             'description' => $repo['description'],
-            'batch' => $parts[0],
-            'category' => $parts[1],
+            'batch' => $batch,
+            'category' => $mainCategory,
+            'organization' => $organization,
 
             'repoLink' => $repo['html_url'],
             'pageLink' => ($repo['has_pages']) ? $pageLink : '',
+
             'coverImgLink' => ($repo['has_pages']) ? $imgLink : '',
+            'thumbImgLink' => ($repo['has_pages']) ? $thumbLink : '',
 
             'has_pages' => $repo['has_pages'],
             'has_wiki' => $repo['has_wiki'],
@@ -176,9 +195,10 @@ class RepositoryController extends Controller
         return ($responseCode == 200);
     }
 
-    public function getRepoContributors($title)
+    public function getRepoContributors($organization, $title)
     {
-        $contributors = GitHub::api('repo')->contributors($this->githubOrgName, $title);
+        // Ex: http://ce-projects.nuwanjaliyagoda.com/api/repository/{{organization}}/{{title}}/contributors
+        $contributors = GitHub::api('repo')->contributors($organization, $title);
         return collect($contributors)->map(function ($contributor) {
             return [
                 'username' => $contributor['login'],
@@ -190,10 +210,11 @@ class RepositoryController extends Controller
         })->toArray();
     }
 
-    public function getRepoLanguages($title)
+    public function getRepoLanguages($organization, $title)
     {
+        // Ex: http://ce-projects.nuwanjaliyagoda.com/api/repository/{{organization}}/{{title}}/languages
         try {
-            $lang = GitHub::api('repo')->languages($this->githubOrgName, $title);
+            $lang = GitHub::api('repo')->languages($organization, $title);
 
             return [
                 'count' => count($lang),

@@ -18,10 +18,11 @@ class CreateProjectsTable extends Migration
             $table->string('title');                // Actual project name
             $table->string('name')->unique();       // This is used to show in the URL
             $table->text('repo_name');
+            $table->string('organization');         // Ex: cepdnaclk
 
             $table->text('description')->nullable();
 
-            $table->char('batch',3);         // Ex: E15
+            $table->char('batch',3)->nullable();         // Ex: E15
             $table->string('main_category');             // Ex: 3yp, temporary column
 
             $table->string('repoLink'); // repository url, full
@@ -38,6 +39,7 @@ class CreateProjectsTable extends Migration
             $table->smallInteger('stars')->default(0);
 
             $table->string('image')->nullable();    // Relative or absolute URL of the image
+            $table->string('thumbnail')->nullable();    // Relative or absolute URL of the image
 
             //$table->enum('status', ['ON_GOING', 'COMPLETED'])->default('ON_GOING');
 

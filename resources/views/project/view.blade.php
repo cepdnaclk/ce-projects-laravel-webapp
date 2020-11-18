@@ -111,35 +111,41 @@
 
                 <!-- Categories Widget -->
 
-                <div class="card my-4 pb-3">
-                    <h5 class="card-header">Languages</h5>
-                    <div class="card-body">
+                @if($langData)
+                    <div class="card my-4 pb-3">
+                        <h5 class="card-header">Languages</h5>
+                        <div class="card-body">
 
-                        <ul class="list-unstyled mb-0">
-                            @foreach($langData['list'] as $key=>$value)
-                                @php
-                                    $percentage = 100.0*round( $value/$langData['total'] ,4 );
-                                @endphp
+                            <ul class="list-unstyled mb-0">
+                                @foreach($langData['list'] as $key=>$value)
+                                    @php
+                                        $percentage = 100.0*round( $value/$langData['total'] ,4 );
+                                    @endphp
 
-                                @if($percentage>0.1)
-                                    <li> {{ $key }} - {{ $percentage }} %</li>
-                                @endif
-                            @endforeach
-                        </ul>
+                                    @if($percentage>0.1)
+                                        <li> {{ $key }} - {{ $percentage }} %</li>
+                                    @endif
+                                @endforeach
+                            </ul>
+                        </div>
                     </div>
-                </div>
+                @endif
 
                 <!-- Side Widget -->
-                <div class="card my-4">
-                    <h5 class="card-header">Contributors</h5>
-                    <div class="card-body">
-                        <ul class="list-unstyled mb-0">
-                            @foreach($contributorData as $contributor)
-                                <li><a href="#" target="_blank">[Image] {{ $contributor['username'] }}</a></li>
-                            @endforeach
-                        </ul>
+                @if($contributorData)
+                    <div class="card my-4">
+                        <h5 class="card-header">Contributors</h5>
+                        <div class="card-body">
+                            <ul class="list-unstyled mb-0">
+
+
+                                @foreach($contributorData as $contributor)
+                                    <li><a href="#" target="_blank">[Image] {{ $contributor['username'] }}</a></li>
+                                @endforeach
+                            </ul>
+                        </div>
                     </div>
-                </div>
+                @endif
             </div>
         </div>
     </div>

@@ -65,8 +65,8 @@ class MaintainController extends Controller
                     $catData = json_decode($response->getBody(), true);
 
                     // TODO: Validate the exist of images
-                    $coverURL = $this->baseRepository . "/data/categories/" . $key . "/". $catData['images']['cover'];
-                    $thumbURL = $this->baseRepository . "/data/categories/" . $key . "/". $catData['images']['thumbnail'];
+                    $coverURL = $this->baseRepository . "/data/categories/" . $key . "/" . $catData['images']['cover'];
+                    $thumbURL = $this->baseRepository . "/data/categories/" . $key . "/" . $catData['images']['thumbnail'];
 
                     print_r($catData);
                     print "<br>";
@@ -92,6 +92,7 @@ class MaintainController extends Controller
 
                         $c = new Category();
                         $c->title = $catData['title'];
+                        $c->type = $catData['type'];
                         $c->category_code = $catData['code'];
                         $c->description = $catData['description'];
                         $c->cover_image = $coverURL;
@@ -141,6 +142,7 @@ class MaintainController extends Controller
                 $p->title = $project['title'];
                 $p->name = $project['name'];
                 $p->repo_name = $project['full_name'];
+                $p->organization = $project['organization'];
 
                 $p->description = $project['description'];
 
@@ -161,7 +163,8 @@ class MaintainController extends Controller
                 $p->stars = $project['stars'];
 
                 // Find for repository own image. If there isn't, use the default one
-                $p->image = ($project['coverImgLink'] != "" ) ? $project['coverImgLink'] : $category->cover_image;
+                $p->image = ($project['coverImgLink'] != "") ? $project['coverImgLink'] : $category->cover_image;
+                $p->thumbnail = ($project['thumbImgLink'] != "") ? $project['thumbImgLink'] : $category->thumb_image;
 
                 //$p->repo_created = $project['repo_created'];
                 //$p->repo_updated = $project['repo_updated'];
@@ -169,9 +172,7 @@ class MaintainController extends Controller
 
                 $status = $p->save();
 
-
                 $p->categories()->attach($category->id);
-
 
                 echo $project['title'] . " - $status <br>";
             }

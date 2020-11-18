@@ -17,6 +17,7 @@ class CreateCategoriesTable extends Migration
             $table->id();
             $table->string('category_code')->unique();        // Ex: FYP, 3YP
             $table->string('title');
+            $table->enum('type', ['COURSE', 'DEPARTMENT']);
             $table->text('description');
             $table->string('cover_image')->nullable();
             $table->string('thumb_image')->nullable();

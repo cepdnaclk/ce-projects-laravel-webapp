@@ -38,6 +38,8 @@ class ProjectController extends Controller
         $project = Project::where('name', $title)->first();
         if ($project == null) return \Response::view('errors.404', [], 404);
 
+        // TODO: Need to override default values, if config file provided by the repository owners
+
         $langData = $project->getLanguages();
         $contributorData = $project->getContributors();
         return view('project.view', compact(['title', 'project', 'langData', 'contributorData']));

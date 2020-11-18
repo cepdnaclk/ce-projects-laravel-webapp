@@ -30,16 +30,11 @@ class Project extends Model
         return Project::where('batch', $batch)->get();
     }
 
-    public static function getBrowserLink($title)
-    {
-        // TODO: need to check for duplicates
-        return preg_replace('/\W+/', '-', ($title));
-    }
 
-    public static function getGithubData($title)
+    public function getGithubData()
     {
         // This will make a request to internal API server and obtain and return the data
-        $request = Request::create(route('api.repository.show', $title), 'GET');
+        $request = Request::create(route('api.repository.show', [$this->organization, $this->repo_name]), 'GET');
         $response = Route::dispatch($request);
         $data = json_decode($response->getContent(), true);
 
@@ -49,14 +44,14 @@ class Project extends Model
 
     public function getLanguages()
     {
-        $request = Request::create(route('api.repository.languages', $this->repo_name), 'GET');
+        $request = Request::create(route('api.repository.languages', [$this->organization, $this->repo_name]), 'GET');
         $response = Route::dispatch($request);
         $data = json_decode($response->getContent(), true);
 
         return $data;
     }
     public function getContributors(){
-        $request = Request::create(route('api.repository.contributors', $this->repo_name), 'GET');
+        $request = Request::create(route('api.repository.contributors',[ $this->organization, $this->repo_name]), 'GET');
         $response = Route::dispatch($request);
         $data = json_decode($response->getContent(), true);
 

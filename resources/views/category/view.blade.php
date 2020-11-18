@@ -9,33 +9,47 @@
             <div class="col-md-2">
                 <h3>{{ $category->title }}</h3>
 
-                @if($batches != null)
-                    <div class="container m-0 p-0">
-                        <div class="p-1"><a href="{{ route('home') }}">Back</a> | {{ $project_count }} Projects</div>
+                @if($category->type=='COURSE')
+                    {{-- Course projects --}}
+
+                    @if($batches != null )
+                        <div class="container m-0 p-0">
+                            <div class="p-1"><a href="{{ route('home') }}">Back</a> | {{ $project_count }} Projects
+                            </div>
+                            <hr>
+
+                            Filter Projects by:
+
+                            <ul class="list-group">
+                                @foreach($batches as $key=>$value)
+                                    @if($key  != null)
+                                        <li class="list-group-item p-1 align-items-center">
+                                            <a href="{{ route('category.batch', [$category->category_code, $key]) }}"
+                                               class="d-flex justify-content-between">
+                                                <span class="mx-2">{{ $key }} Batch</span>
+                                                <span
+                                                    class="d-none mx-2 badge badge-secondary badge-pill">{{ $value->count() }}</span>
+                                            </a>
+                                        </li>
+                                    @endif
+                                @endforeach
+                            </ul>
+                        </div>
+                    @else
+                        <div class="p-1"><a href="{{ route('category.show', $category->category_code) }}">Back</a>
+                            | {{ $project_count }} Projects
+                        </div>
                         <hr>
-
-                        Filter Projects by:
-
-                        <ul class="list-group">
-                            @foreach($batches as $key=>$value)
-                                <li class="list-group-item p-1 align-items-center">
-                                    <a href="{{ route('category.batch', [$category->category_code, $key]) }}"
-                                       class="d-flex justify-content-between">
-                                        <span class="mx-2">{{ $key }} Batch</span>
-                                        <span
-                                            class="d-none mx-2 badge badge-secondary badge-pill">{{ $value->count() }}</span>
-                                    </a>
-                                </li>
-                            @endforeach
-                        </ul>
-                    </div>
+                        Projects by <b>{{ $subtitle }}</b> batch
+                        <br><br>
+                    @endif
                 @else
-                    <div class="p-1"><a href="{{ route('category.show', $category->category_code) }}">Back</a>
+                    {{-- non-course projects --}}
+
+                    <div class="p-1"><a href="{{ route('home') }}">Back</a>
                         | {{ $project_count }} Projects
                     </div>
-                    <hr>
-                    Projects by <b>{{ $subtitle }}</b> batch
-                    <br><br>
+
                 @endif
             </div>
 
@@ -59,12 +73,18 @@
                                         <div class="card h-100 m-0">
                                             <img class="card-img-top" src="{{ $category->thumb_image }}" alt="">
                                             <div class="card-body p-0 m-1">
-                                                <p class="card-title">{{ $proj->title }} ({{ $proj->batch }})</p>
+
+                                                @if($proj->batch)
+                                                    <p class="card-title">{{ $proj->title }} ({{ $proj->batch }})</p>
+                                                @else
+                                                    <p class="card-title">{{ $proj->title }}</p>
+                                                @endif
                                             </div>
                                         </div>
                                     </a>
                                 </div>
                             @endforeach
+
                         @else
 
                             <div class="text-center p-5" style="width: 100%;">

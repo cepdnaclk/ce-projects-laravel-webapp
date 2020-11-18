@@ -18,14 +18,15 @@ class CategoryController extends Controller
     {
         $category = Category::where('category_code', $category_code)->first();
 
-        if($category==null)  return \Response::view('errors.404',[],404);
+        if ($category == null) return \Response::view('errors.404', [], 404);
 
-        $batches = Project::all()->groupBy('batch')->reverse();
+        $batches = Project::all()->groupBy('batch')->sortKeysDesc();
+        //dd($batches);
 
-        $project_count =  $category->projects()->count();
+        $project_count = $category->projects()->count();
         $projects = $category->projects()->paginate(12);
 
-        return view('category.view', compact(['category','projects', 'batches', 'project_count']));
+        return view('category.view', compact(['category', 'projects', 'batches', 'project_count']));
     }
 
     public function showByBatch($category_code, $batch)
@@ -33,9 +34,9 @@ class CategoryController extends Controller
         $category = Category::where('category_code', $category_code)->first();
         $projects = $category->projects()->where('batch', $batch)->get()->unique();
         $batches = null;
-        $project_count =  $category->projects()->count();
+        $project_count = $category->projects()->count();
         $subtitle = $batch;
 
-        return view('category.view', compact(['category','projects', 'batches', 'subtitle', 'project_count']));
+        return view('category.view', compact(['category', 'projects', 'batches', 'subtitle', 'project_count']));
     }
 }
