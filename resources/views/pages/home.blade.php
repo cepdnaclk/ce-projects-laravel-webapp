@@ -19,12 +19,12 @@
         <!-- Page Features -->
         <div class="row text-center my-4">
             @foreach($categories as $cat)
-                <div class="col-lg-3 col-md-6 mb-2">
+                <div class="col-lg-3 col-md-6 mb-2 d-flex">
                     <a class="btn" href="{{ route("category.show", $cat->category_code) }}">
                         <div class="card h-100">
                             <img class="card-img-top" src="{{ $cat->thumb_image }}" alt="">
                             <div class="card-body">
-                                <h4 class="card-title">{{ $cat->title }}</h4>
+                                <h5 class="card-title">{{ $cat->title }}</h5>
                             </div>
                         </div>
                     </a>

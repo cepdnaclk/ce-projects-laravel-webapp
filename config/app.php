@@ -175,7 +175,8 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
-        GrahamCampbell\GitHub\GitHubServiceProvider::class
+        GrahamCampbell\GitHub\GitHubServiceProvider::class,
+
     ],
 
     /*

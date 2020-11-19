@@ -1,7 +1,6 @@
 @extends('layouts.public')
 
-@section('title','Project')
-
+@section('title',$project->title)
 
 @section('content')
 
@@ -44,9 +43,34 @@
                 <!-- Post Content -->
                 <p class="lead">{{ $project->description }}</p>
 
+                @if($project->students)
+                    <div class="container pt-3">
+                        <h3>Students</h3>
+                        <ul>
+                            @foreach($project->students as $student)
+                                <li>{{ $student['eNumber'] }} | {{ $student['name'] }} |
+                                    <a href="mailto:{{ $student['email'] }}">{{ $student['email'] }}</a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                @if($project->supervisors)
+                    <div class="container py-3">
+                        <h3>Supervisors/Mentors</h3>
+                        <ul>
+                            @foreach($project->supervisors as $supervisor)
+                                <li>{{ $supervisor['name'] }} |
+                                    <a href="mailto:{{ $supervisor['email'] }}">{{ $supervisor['email'] }}</a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
                 <hr>
 
-                <div class="row">
+                <div class="row pt-3">
                     <div class="col-md-6">
                         <div class="card mb-3">
                             <a class="btn" href="{{ $project->repoLink }}" target="_blank">
@@ -88,6 +112,7 @@
                     @if($project->has_wiki==true)
 
                     @endif
+
                 </div>
 
             </div>
@@ -111,7 +136,7 @@
 
                 <!-- Categories Widget -->
 
-                @if($project->languageData)
+                @if($project->languageData && $project->languageData['count']>0 )
                     <div class="card my-4 pb-3">
                         <h5 class="card-header">Languages</h5>
                         <div class="card-body">
@@ -131,22 +156,37 @@
                     </div>
                 @endif
 
-                <!-- Side Widget -->
+            <!-- Side Widget -->
                 @if($project->contributorData)
                     <div class="card my-4">
                         <h5 class="card-header">Contributors</h5>
                         <div class="card-body">
                             <ul class="list-unstyled mb-0">
 
-
                                 @foreach($project->contributorData['list'] as $contributor)
-                                    <li><a href="#" target="_blank">[Image] {{ $contributor['username'] }}</a></li>
+                                    <li>
+                                        <div class="w3-container d-flex">
+                                            <img class="rounded-circle p-1 align-self-center"
+                                                 alt="{{ $contributor['username'] }}"
+                                                 style="width: 48px; height: 48px;"
+                                                 src="{{ $contributor['avatar'] }}">
+                                            <span class="align-self-center p-3">
+                                                <a href="#" target="_blank">{{ $contributor['username'] }}</a>
+                                            </span>
+                                        </div>
+
+                                    </li>
                                 @endforeach
                             </ul>
                         </div>
                     </div>
                 @endif
             </div>
+        </div>
+
+        <div class="container text-center p-5">
+            <hr>
+            <span>Updated at: {{ $project->updated_at }}</span>
         </div>
     </div>
 @endsection

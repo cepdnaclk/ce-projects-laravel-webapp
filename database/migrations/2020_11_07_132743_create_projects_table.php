@@ -46,6 +46,10 @@ class CreateProjectsTable extends Migration
             $table->json('languageData')->nullable();
             $table->json('contributorData')->nullable();
 
+            // TODO: move these data into separate model and pivot table
+            $table->json('students')->nullable();
+            $table->json('supervisors')->nullable();
+
             $table->dateTime('repo_created')->nullable();
             $table->dateTime('repo_updated')->nullable();
             $table->string('default_branch')->nullable();

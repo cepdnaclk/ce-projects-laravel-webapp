@@ -15,11 +15,11 @@ class CreateStudentsTable extends Migration
     {
         Schema::create('students', function (Blueprint $table) {
             $table->id();
-            $table->string('initials');
-            $table->string('surname');
-            $table->string('eNumber', 3)->unique();    // Ex: e15
+            //$table->string('initials');
+            $table->string('name');
             $table->string('email')->unique();                // Must be eng.pdn.ac.lk email
-            $table->timestamps();
+            $table->string('eNumber', 8)->unique();    // Ex: E/15/140
+            //$table->timestamps();
         });
     }
 

@@ -218,4 +218,25 @@ class RepositoryController extends Controller
             ];
         }
     }
+
+
+    public function test($organization, $title)
+    {
+
+        $url = "https://$organization.github.io/$title/data/index.json";
+
+        $client = new \GuzzleHttp\Client();
+
+        try {
+            $response = $client->request('GET', $url);
+
+            if ($response->getStatusCode() == 200) {
+                $data = json_decode($response->getBody(), true);
+                dd($data);
+            }
+        } catch (\Exception $ex) {
+
+        }
+
+    }
 }

@@ -26,6 +26,7 @@ class UpdateController extends Controller
 
     public function updateCategories()
     {
+        set_time_limit(0);
         $url = $this->baseRepository . "/data/categories/list.json";
         $client = new \GuzzleHttp\Client();
         $resp = [];
@@ -92,6 +93,7 @@ class UpdateController extends Controller
 
     public function updateProjects()
     {
+        set_time_limit(0);
         $categories = Category::all();
         Project::deleteAll();
         $resp = [];
@@ -108,7 +110,12 @@ class UpdateController extends Controller
 
                     // TODO: require some validation
 
-                    $p = new Project();
+                    $p = Project::getByName($project['name']);
+
+                    // If project isn't exists, create one
+                    if ($p == null) {
+                        $p = new Project();
+                    }
 
                     $p->title = $project['title'];
                     $p->name = $project['name'];
@@ -156,7 +163,6 @@ class UpdateController extends Controller
         }
         return response()->json($resp);
     }
-
 
     public function updateSingleProjects($organization, $title)
     {
@@ -222,6 +228,30 @@ class UpdateController extends Controller
 
             $p->save();
             $p->categories()->sync($category->id);
+
+            // Get project own configurations
+            $projURL = "https://$organization.github.io/$title/data/";
+            $client = new \GuzzleHttp\Client();
+            try {
+                $response = $client->request('GET', $projURL);
+
+                if ($response->getStatusCode() == 200) {
+                    $data = json_decode($response->getBody(), true);
+                    $p->title = $data['title'];
+                    $p->description = $data['description'];
+
+                    $p->image = $projURL . $data['image'];
+                    $p->thumbnail = $projURL . $data['thumbnail'];
+
+                    $p->students = $data['team'];
+                    $p->supervisors = $data['supervisors'];
+
+                    $p->save();
+                    //dd($data);
+                }
+            } catch (\Exception $ex) {
+
+            }
 
             $resp = $p;
 

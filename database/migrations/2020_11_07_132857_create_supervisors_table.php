@@ -15,11 +15,10 @@ class CreateSupervisorsTable extends Migration
     {
         Schema::create('supervisors', function (Blueprint $table) {
             $table->id();
-            $table->enum('title', ['Mr.', 'Mrs.', 'Miss.', 'Dr.', 'Prof.']);
-            $table->string('initials');
-            $table->string('surname');
+            //$table->enum('title', ['Mr.', 'Mrs.', 'Miss.', 'Dr.', 'Prof.'])->nullable();
+            $table->string('name');
             $table->string('email')->unique();                // Must be eng.pdn.ac.lk email
-            $table->timestamps();
+            //$table->timestamps();
         });
     }
 

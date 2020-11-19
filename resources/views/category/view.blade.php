@@ -71,7 +71,7 @@
                                 <div class="col-lg-3 col-md-6 d-flex">
                                     <a class="btn" href="{{ route("project.show", $proj->name) }}">
                                         <div class="card h-100 m-0">
-                                            <img class="card-img-top" src="{{ $category->thumb_image }}" alt="">
+                                            <img class="card-img-top" src="{{ $proj->thumbnail }}" alt="">
                                             <div class="card-body p-0 m-1">
 
                                                 @if($proj->batch)

@@ -21,6 +21,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::get('repository/{organization}/{title}/languages', 'API\RepositoryController@getRepoLanguages')->name('api.repository.languages');
 Route::get('repository/{organization}/{title}/contributors', 'API\RepositoryController@getRepoContributors')->name('api.repository.contributors');
 Route::get('repository/{organization}/{title}', 'API\RepositoryController@show')->name('api.repository.show');
+Route::get('repository/{organization}/{title}/test', 'API\RepositoryController@test')->name('api.repository.test');
 
 //Route::get('repository/{title}', 'API\RepositoryController@show')->name('api.repository.show');
 Route::get('repositories/{organization}', 'API\RepositoryController@index')->name('api.repository.index');

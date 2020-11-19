@@ -13,7 +13,9 @@ class Project extends Model
     // protected $guarded = [];
     protected $casts = [
         'languageData' => 'array',
-        'contributorData' => 'array'
+        'contributorData' => 'array',
+        'students' => 'array',
+        'supervisors' => 'array',
     ];
 
     // Return the main category of the project
@@ -27,6 +29,20 @@ class Project extends Model
     {
         return $this->belongsToMany(Category::class);
     }
+
+    // Get a list of students
+    /*public function students()
+    {
+        return $this->hasMany(Student::class);
+    }*/
+
+    // Get a list of supervisors
+    /*public function supervisors()
+    {
+        return $this->hasMany(Supervisor::class);
+    }*/
+
+    // ------------------------------------------------------------------------
 
     public static function getByBatch($batch)
     {
@@ -44,7 +60,7 @@ class Project extends Model
         $updated = strtotime($this->updated_at);
         $now = time();
         $diff = floor(($now - $updated) / 60);
-        $cacheTime = 1; // env('PROJECT_CACHE_TIME');
+        $cacheTime = 10; // env('PROJECT_CACHE_TIME');
 
         // if the difference is greater then $cacheTime, it will automatically update the project details from GitHub
 
@@ -67,7 +83,6 @@ class Project extends Model
 
         return $data;
     }
-
 
     public function getLanguages()
     {
