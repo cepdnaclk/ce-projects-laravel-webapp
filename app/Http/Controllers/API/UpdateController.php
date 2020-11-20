@@ -227,7 +227,9 @@ class UpdateController extends Controller
             $p->default_branch = $project['default_branch'];
 
             $p->save();
-            $p->categories()->sync($category->id);
+
+            // TODO: Need to care this
+            //$p->categories()->sync($p->category->id);
 
             // Get project own configurations
             $projURL = "https://$organization.github.io/$title/data/";
