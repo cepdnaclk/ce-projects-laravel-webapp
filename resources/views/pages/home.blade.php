@@ -13,7 +13,7 @@
             <p class="lead">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsa, ipsam, eligendi, in quo sunt
                 possimus non incidunt odit vero aliquid similique quaerat nam nobis illo aspernatur vitae fugiat numquam
                 repellat.</p>
-            <a href="#" class="btn btn-primary btn-lg">View Project Categories!</a>
+            <a href="#" class="d-none btn btn-primary btn-lg">View Project Categories!</a>
         </header>
 
         <!-- Page Features -->

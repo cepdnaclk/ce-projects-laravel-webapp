@@ -30,5 +30,7 @@ Route::get('repositories/filter/{category_code}', 'API\RepositoryController@cate
 
 Route::get('update/categories', 'API\UpdateController@updateCategories')->name('api.update.categories');
 Route::get('update/projects', 'API\UpdateController@updateProjects')->name('api.update.projects');
+
 Route::get('update/project/{organization}/{title}', 'API\UpdateController@updateSingleProjects')->name('api.update.singleProject');
+Route::post('update/project/{organization}/{title}', 'API\UpdateController@updateSingleProjects')->name('api.update.singleProject'); // request comming from GitHub Webhook
 

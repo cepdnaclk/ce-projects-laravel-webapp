@@ -21,10 +21,9 @@
                     by <a href="#">Start Bootstrap</a>
                 </p>
 
-                <!-- Date/Time -->
                 <div class="">
                     <div>
-                        <span class="px-3"><a href="{{ URL::previous() }}">Back</a></span>
+                        <span class="px-3"><a href="{{ route("category.show", $category_code) }}">Back</a></span>
                         Started on {{ date_format(date_create( $project->created_at), 'Y-m-d') }}
                         <span class="px-3">Forks: <span class="">{{ $project->forks }}</span></span>
                         <span class="px-3"> Watchers: <span class="">{{ $project->watchers }}</span> </span>
@@ -184,9 +183,10 @@
             </div>
         </div>
 
-        <div class="container text-center p-5">
+        <div class="container text-center p-2">
             <hr>
-            <span>Updated at: {{ $project->updated_at }}</span>
+            <span>Last Updated: {{ $project->updated_at }}</span> |
+            <a href="{{ route('project.update', $project->id) }}" class="">Update</a>
         </div>
     </div>
 @endsection

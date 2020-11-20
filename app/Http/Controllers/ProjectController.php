@@ -39,31 +39,28 @@ class ProjectController extends Controller
 
         if ($project == null) return \Response::view('errors.404', [], 404);
 
-        // TODO: Need to override default values, if config file provided by the repository owners
+        $category_code = $project->getParentCategory()->category_code;
 
-        if($project->syncProject()) {
+        // TODO: Need to override default values, if config file provided by the repository owners
+        if ($project->syncProject()) {
             $project = $project->fresh();
         }
 
         //$langData = $project->getLanguages();
         //$contributorData = $project->getContributors();
-        return view('project.view', compact(['title', 'project']));
+        return view('project.view', compact(['title', 'project', 'category_code']));
 
 
     }
 
-    public function edit(Project $project)
+
+    public function update(Project $project)
     {
-        //
+        //dd($project);
+
+        $request = Request::create(route('api.update.singleProject', [$project->organization, $project->repo_name]), 'GET');
+        $response = Route::dispatch($request);
+        return redirect()->route('project.show', $project->name);
     }
 
-    public function update(Request $request, Project $project)
-    {
-        //
-    }
-
-    public function destroy(Project $project)
-    {
-        //
-    }
 }

@@ -54,7 +54,8 @@ Route::get('category/{category_title}/{batch_id}', 'CategoryController@showByBat
 
 // Project Routes
 Route::get('projects/', 'ProjectController@index')->name('project.index');
-Route::get('project/{project_id}', 'ProjectController@show')->name('project.show');
+Route::get('project/{title}', 'ProjectController@show')->name('project.show');
+Route::get('project/refresh/{project}', 'ProjectController@update')->name('project.update');
 
 
 // Batch/Category specific project (need a routing mechanism in future)

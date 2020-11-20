@@ -9,6 +9,8 @@
             <div class="col-md-2">
                 <h3>{{ $category->title }}</h3>
 
+                <p>{{ $category->description }}</p>
+
                 @if($category->type=='COURSE')
                     {{-- Course projects --}}
 
@@ -22,16 +24,14 @@
 
                             <ul class="list-group">
                                 @foreach($batches as $key=>$value)
-                                    @if($key  != null)
-                                        <li class="list-group-item p-1 align-items-center">
-                                            <a href="{{ route('category.batch', [$category->category_code, $key]) }}"
-                                               class="d-flex justify-content-between">
-                                                <span class="mx-2">{{ $key }} Batch</span>
-                                                <span
-                                                    class="d-none mx-2 badge badge-secondary badge-pill">{{ $value->count() }}</span>
-                                            </a>
-                                        </li>
-                                    @endif
+                                    <li class="list-group-item p-1 align-items-center">
+                                        <a href="{{ route('category.batch', [$category->category_code, $value->batch]) }}"
+                                           class="d-flex justify-content-between">
+                                            <span class="mx-2">{{ $value->batch }} Batch</span>
+                                            <span
+                                                class="mx-2 badge badge-secondary badge-pill">{{ $value->count }}</span>
+                                        </a>
+                                    </li>
                                 @endforeach
                             </ul>
                         </div>

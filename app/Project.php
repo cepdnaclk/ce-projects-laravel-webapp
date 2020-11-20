@@ -44,6 +44,11 @@ class Project extends Model
 
     // ------------------------------------------------------------------------
 
+    public function getParentCategory()
+    {
+        return Category::getByCode($this->main_category);
+    }
+
     public static function getByBatch($batch)
     {
         return Project::where('batch', $batch)->get();
