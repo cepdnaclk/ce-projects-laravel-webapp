@@ -18,12 +18,12 @@
 
                 <!-- Author | hidden for now -->
                 <p class="d-none lead">
-                    by <a href="#">Start Bootstrap</a>
+                    by <a href="#">Author</a>
                 </p>
 
                 <div class="">
                     <div>
-                        <span class="px-3"><a href="{{ route("category.show", $category_code) }}">Back</a></span>
+                        <span class="px-3"><a href="{{ route("category.show", $project->main_category) }}">Back</a></span>
                         Started on {{ date_format(date_create( $project->created_at), 'Y-m-d') }}
                         <span class="px-3">Forks: <span class="">{{ $project->forks }}</span></span>
                         <span class="px-3"> Watchers: <span class="">{{ $project->watchers }}</span> </span>

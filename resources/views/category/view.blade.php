@@ -66,8 +66,9 @@
                     <div class="row">
 
                         @if($projects->count() > 0)
-
+                            {{-- @foreach($projects->reverse() as $proj)--}}
                             @foreach($projects->shuffle() as $proj)
+
                                 <div class="col-lg-3 col-md-6 d-flex">
                                     <a class="btn" href="{{ route("project.show", $proj->name) }}">
                                         <div class="card h-100 m-0">

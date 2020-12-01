@@ -14,7 +14,6 @@ class RepositoryController extends Controller
 {
     protected $githubOrgName;
 
-
     // Contributors:  https://api.github.com/repos/nuwanj/FYP-simulator-gui/contributors
     //      avatar_url, html_url, login, contributions
 
@@ -29,7 +28,6 @@ class RepositoryController extends Controller
     //      https://docs.github.com/en/free-pro-team@latest/rest/reference/search
     //      https://docs.github.com/en/free-pro-team@latest/rest/reference/search#constructing-a-search-query
 
-
     public function __construct(GitHubManager $manager)
     {
         $this->client = $manager->connection();
@@ -37,6 +35,7 @@ class RepositoryController extends Controller
         $this->githubOrgName = env('GITHUB_ORGANIZATION');
     }
 
+    // Show all repositories in an organization
     public function index($organization)
     {
         // Ex: http://projects.ce.pdn.ac.lk/api/repositories/{organization}
@@ -61,24 +60,23 @@ class RepositoryController extends Controller
         $languages = $this->getRepoLanguages($organization, $title);
         $contributorArray = $this->getRepoContributors($organization, $title);
 
-        $resp = $this->prepareRepository($repo)[$repo['name']];
+        $resp = $this->prepareRepository($repo, '')[$repo['name']];
         $resp['contributors'] = ['count' => count($contributorArray), 'list' => $contributorArray];
         $resp['languages'] = $languages;
 
         return response()->json($resp);
     }
 
+    // Filter projects on a given category
     public function categoryFilter($category_code)
     {
         // Ex: Ex: http://projects.ce.pdn.ac.lk/repositories/filter/{category_code}
 
         $c = Category::where('category_code', $category_code)->first();
-
-        if ($c == null) { // If the category_code is not in the database
-            return response()->json(['count' => 0, 'repositories' => []]);
-        }
-
         $repositories = [];
+
+        // If the category_code is not in the database
+        if ($c == null) return response()->json(['count' => 0, 'repositories' => []]);
 
         foreach ($c->filters as $pattern) {
             // Filter with the given list of regex filters
@@ -89,9 +87,11 @@ class RepositoryController extends Controller
                 return preg_match("/" . $pattern['filter'] . "/", $value['name']);
             });
 
-            $newRepositories = $filtered->mapWithKeys(function ($repo) {
+            $category_code = $c->category_code;
+
+            $newRepositories = $filtered->mapWithKeys(function ($repo) use ($category_code) {
                 // This will filter out unwanted parameters from the repository list
-                return $this->prepareRepository($repo);
+                return $this->prepareRepository($repo,$category_code);
             });
 
             // merge search results
@@ -101,34 +101,36 @@ class RepositoryController extends Controller
                 'count' => count($repositories),
                 'repositories' => $repositories]
         );
-
     }
 
-    private function prepareRepository($repo)
+    // Prepare repository bu removing unwanted data
+    private function prepareRepository($repo, $category_code)
     {
         $parts = explode('-', $repo['name']);
         $organization = $repo['owner']['login'];
 
-        // TODO: Need to format this in better way
+        // TODO: Need to format this name by a better way
 
         if (strtolower(substr($repo['name'], 0, 1)) == "e") {
-            // course project
+            // COURSE project
 
             $title = Project::formatTitle(substr($repo['name'], (strlen($parts[0]) + 2 + strlen($parts[1]))));
             $repoName = $parts[0] . "-" . (substr($repo['name'], (strlen($parts[0]) + 2 + strlen($parts[1]))));
             $batch = $parts[0];
-            $mainCategory = $parts[1];
+            $mainCategory = $category_code;
 
         } else {
-            // department project
+            // DEPARTMENT project
 
             $title = str_replace('-', " ", $repo['name']);
             $repoName = $repo['name'];
             $batch = null;
-            $mainCategory = $parts[0];
+            $mainCategory = $category_code;
         }
 
         if ($repo['has_pages']) {
+            // Obtain some data from the repository, if GitHub pages already available
+
             $pageLink = "https://" . $organization . ".github.io/" . $repo['name'];
             $imgLink = $pageLink . "/img_cover.jpg";
             $imgLink = ($this->fileExists($imgLink)) ? $imgLink : '';
@@ -167,6 +169,7 @@ class RepositoryController extends Controller
         ]];
     }
 
+    // Check for the existence of a given URL
     private function fileExists($url)
     {
         $ch = curl_init($url);
@@ -178,17 +181,20 @@ class RepositoryController extends Controller
         return ($responseCode == 200);
     }
 
+    // The the list of contributors on a given repository
     public function getRepoContributors($organization, $title)
     {
         // Ex: http://projects.ce.pdn.ac.lk/api/repository/{{organization}}/{{title}}/contributors
+
         try {
             $contributors = GitHub::api('repo')->contributors($organization, $title);
             return collect($contributors)->map(function ($contributor) {
                 return [
                     'username' => $contributor['login'],
                     'avatar' => $contributor['avatar_url'],
-                    /*'name' => $contributor['name'],*/
                     'url' => $contributor['html_url'],
+
+                    /*'name' => $contributor['name'],*/
                     /*'data' => $contributor,*/
                 ];
             })->toArray();
@@ -197,6 +203,7 @@ class RepositoryController extends Controller
         }
     }
 
+    // The the list of languages used on a given repository
     public function getRepoLanguages($organization, $title)
     {
         // Ex: http://projects.ce.pdn.ac.lk/api/repository/{{organization}}/{{title}}/languages
@@ -204,22 +211,14 @@ class RepositoryController extends Controller
         try {
             $lang = GitHub::api('repo')->languages($organization, $title);
 
-            return [
-                'count' => count($lang),
-                'total' => array_sum($lang),
-                'list' => $lang
-            ];
+            return ['count' => count($lang), 'total' => array_sum($lang), 'list' => $lang];
 
         } catch (\Exception $e) {
-            return [
-                'count' => 0,
-                'total' => 0,
-                'list' => []
-            ];
+            return ['count' => 0, 'total' => 0, 'list' => []];
         }
     }
 
-
+    // This is a test function, for the production environment
     public function test($organization, $title)
     {
 

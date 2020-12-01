@@ -15,6 +15,7 @@ class CreateProjectsTable extends Migration
     {
         Schema::create('projects', function (Blueprint $table) {
             $table->id();
+            $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE'); // used for soft update
             $table->string('title');                // Actual project name
             $table->string('name')->unique();       // This is used to show in the URL
             $table->text('repo_name');
@@ -46,7 +47,7 @@ class CreateProjectsTable extends Migration
             $table->json('languageData')->nullable();
             $table->json('contributorData')->nullable();
 
-            // TODO: move these data into separate model and pivot table
+            // TODO: move these data into separate models and pivot table
             $table->json('students')->nullable();
             $table->json('supervisors')->nullable();
 

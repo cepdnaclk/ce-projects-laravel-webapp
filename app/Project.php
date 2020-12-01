@@ -61,16 +61,15 @@ class Project extends Model
 
     public function syncProject()
     {
-
         $updated = strtotime($this->updated_at);
         $now = time();
         $diff = floor(($now - $updated) / 60);
-        $cacheTime = 10; // env('PROJECT_CACHE_TIME');
+        $cacheTime = 1440; // a day // env('PROJECT_CACHE_TIME');
 
         // if the difference is greater then $cacheTime, it will automatically update the project details from GitHub
 
         if ($diff >= $cacheTime || $this->contributorData == null || $this->languageData == null) {
-            $request = Request::create(route('api.update.singleProject', [$this->organization, $this->repo_name]), 'GET');
+            $request = Request::create(route('api.update.singleProjectWithCategory', [$this->organization, $this->repo_name, $this->main_category]), 'GET');
             $response = Route::dispatch($request);
 
             return ($response->getStatusCode() == 200);

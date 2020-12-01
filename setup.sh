@@ -17,19 +17,18 @@ chmod -R 777 app/storage bootstrap/cache
 #composer require laravel/ui 2.1
 #php artisan ui vue --auth
 
-npm run development
-
-
 echo "Installing NPM packages"
 npm install
 npm run development
+
 # npm run production
 
-# echo "Creating the database : sqlite"
-# mkdir -p database
-# touch database/database.sqlite
+echo "Creating the database : sqlite"
+mkdir -p database
+touch database/database.sqlite
+chmod -R 777 database/database.sqlite
 
-php artisan migrate
+php artisan migrate:fresh
 
 ###
 # Done and Clean up

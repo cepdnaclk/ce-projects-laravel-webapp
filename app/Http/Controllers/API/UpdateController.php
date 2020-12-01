@@ -18,15 +18,14 @@ class UpdateController extends Controller
 
     public function __construct(GitHubManager $manager)
     {
+        set_time_limit(0);      // No timeout for the script execution
+
         $this->client = $manager->connection();
         $this->paginator = new \Github\ResultPager($this->client);
-
-        //$this->middleware('auth');
     }
 
     public function updateCategories()
     {
-        set_time_limit(0);
         $url = $this->baseRepository . "/data/categories/list.json";
         $client = new \GuzzleHttp\Client();
         $resp = [];
@@ -49,15 +48,17 @@ class UpdateController extends Controller
                     $thumbURL = $this->baseRepository . "/data/categories/" . $key . "/" . $catData['images']['thumbnail'];
 
                     if ($this->fileExists($coverURL) == false) {
+                        // Use the default one
                         $coverURL = $this->baseRepository . "/data/categories/template/cover_page.jpg";
                     }
+
                     if ($this->fileExists($thumbURL) == false) {
+                        // Use the default one
                         $thumbURL = $this->baseRepository . "/data/categories/template/thumbnail.jpg";
                     }
 
                     if ($catData != null) {
-
-                        // TODO: Need to run validator before create
+                        // TODO: require some validation
 
                         $c = new Category();
                         $c->title = $catData['title'];
@@ -88,14 +89,61 @@ class UpdateController extends Controller
         } finally {
             return response()->json($resp);
         }
-
     }
 
     public function updateProjects()
     {
-        set_time_limit(0);
         $categories = Category::all();
         Project::deleteAll();
+        $resp = [];
+
+        foreach ($categories as $category) {
+            try {
+                $category_code = $category->category_code;
+
+                // foreach project
+                // $request = Request::create(route('api.update.singleProject', [$this->organization, $this->repo_name]), 'GET');
+                // $response = Route::dispatch($request);
+                $repositories = [];
+
+                // If the category_code is not in the database
+
+                foreach ($category->filters as $pattern) {
+                    // Filter with the given list of regex filters
+
+                    $allRepos = $this->paginator->fetchAll($this->client->user(), 'repositories', [$pattern['organization']]);
+
+                    $filtered = collect($allRepos)->filter(function ($value, $key) use ($pattern) {
+                        return preg_match("/" . $pattern['filter'] . "/", $value['name']);
+                    });
+
+                    //$category_code = $category->category_code;
+
+                    $newRepositories = $filtered->mapWithKeys(function ($repo) use ($category_code) {
+                        // This will filter out unwanted parameters from the repository list
+                        $request = Request::create(route('api.update.singleProjectWithCategory', [$repo['owner']['login'], $repo['name'], $category_code]), 'GET');
+                        $response = Route::dispatch($request);
+                        $repo = json_decode($response->getContent(), true);
+                        return [$repo['name'] => $repo];//$this->prepareRepository($repo,$category_code);
+                    });
+
+                    // merge search results
+                    $repositories = array_replace($repositories, $newRepositories->toArray());
+                }
+
+                $resp[$category_code] = $repositories;
+
+            } catch (\Exception $ex) {
+                // Error handler
+            }
+        }
+        return response()->json($resp);
+    }
+
+    public function softUpdateProjects(){
+
+        $categories = Category::all();
+        $projects = Project::where('status','ACTIVE')->update(['status'=>'INACTIVE']);
         $resp = [];
 
         foreach ($categories as $category) {
@@ -107,17 +155,19 @@ class UpdateController extends Controller
                 $data = json_decode($response->getContent(), true);
 
                 foreach ($data['repositories'] as $key => $project) {
-
                     // TODO: require some validation
 
+                    $isNew = false;
                     $p = Project::getByName($project['name']);
 
                     // If project isn't exists, create one
                     if ($p == null) {
+                        $isNew = true;
                         $p = new Project();
                     }
 
                     $p->title = $project['title'];
+                    $p->status ='ACTIVE';
                     $p->name = $project['name'];
                     $p->repo_name = $project['full_name'];
                     $p->organization = $project['organization'];
@@ -152,19 +202,29 @@ class UpdateController extends Controller
                     $p->default_branch = $project['default_branch'];
 
                     $p->save();
-                    $p->categories()->attach($category->id);
+
+                    if($isNew){
+                        $p->categories()->attach($category->id);
+                    }else{
+                        //$p->categories()->sync();
+                    }
 
                     $resp[$category_code][$project['title']] = $p;
+
                 }
 
             } catch (\Exception $ex) {
                 // Error handler
             }
         }
-        return response()->json($resp);
-    }
 
-    public function updateSingleProjects($organization, $title)
+        // Delete non-existing projects
+        $deletedProjects = Project::where('status','INACTIVE')->delete();
+        return response()->json($resp);
+
+        }
+
+    public function updateSingleProject($organization, $title, $categoryParam=null)
     {
         // TODO: require some validation
 
@@ -174,7 +234,8 @@ class UpdateController extends Controller
         if ($response->getStatusCode() == 200) {
 
             $project = json_decode($response->getContent(), true);
-            $category = Category::getByCode($project['category']);
+            $categoryCode = ($categoryParam==null) ? $project['category'] : $categoryParam;
+            $category = Category::getByCode($categoryCode);
 
             // Select default cover and thumbnail images
             if ($category == null) {
@@ -188,19 +249,15 @@ class UpdateController extends Controller
             $p = Project::getByName($project['name']);
 
             // If project isn't exists, create one
-            if ($p == null) {
-                $p = new Project();
-            }
+            if ($p == null) $p = new Project();
 
             $p->title = $project['title'];
             $p->name = $project['name'];
             $p->repo_name = $project['full_name'];
             $p->organization = $project['organization'];
-
             $p->description = $project['description'];
-
             $p->batch = $project['batch'];
-            $p->main_category = $project['category'];
+            $p->main_category = ($categoryParam != null) ? $categoryParam : $project['category'];
 
             $p->repoLink = $project['repoLink'];
             $p->pageLink = $project['pageLink'];
@@ -215,25 +272,28 @@ class UpdateController extends Controller
             $p->watchers = $project['watchers'];
             $p->stars = $project['stars'];
 
-            // Find for repository own image. If there isn't, use the default one
+            // Find for repository own image. If there isn't, use the default one defined for the category
             $p->image = ($project['coverImgLink'] != "") ? $project['coverImgLink'] : $category_cover;
             $p->thumbnail = ($project['thumbImgLink'] != "") ? $project['thumbImgLink'] : $category_thumb;
 
             $p->languageData = $project['languages'];
             $p->contributorData = $project['contributors'];
 
-            //$p->repo_created = $project['repo_created'];
-            //$p->repo_updated = $project['repo_updated'];
+            $p->repo_created = date("Y-m-d h:i:s", strtotime($project['repo_created']));
+            $p->repo_updated = date("Y-m-d h:i:s", strtotime($project['repo_updated']));
             $p->default_branch = $project['default_branch'];
 
             $p->save();
 
             // TODO: Need to care this
-            //$p->categories()->sync($p->category->id);
+            if($categoryParam != null) {
+                $p->categories()->syncWithoutDetaching($category->id);
+            }
 
             // Get project own configurations
             $projURL = "https://$organization.github.io/$title/data/";
             $client = new \GuzzleHttp\Client();
+
             try {
                 $response = $client->request('GET', $projURL);
 
@@ -249,7 +309,6 @@ class UpdateController extends Controller
                     $p->supervisors = $data['supervisors'];
 
                     $p->save();
-                    //dd($data);
                 }
             } catch (\Exception $ex) {
 
@@ -265,7 +324,6 @@ class UpdateController extends Controller
 
         return response()->json($resp);
     }
-
 
     private function fileExists($url)
     {

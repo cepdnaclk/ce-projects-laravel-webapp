@@ -22,41 +22,25 @@ Route::get('contact', 'PageController@contact')->name('contact');
 
 Route::get('dashboard', 'PageController@index')->name('dashboard.home');
 
-//Route::group(['middleware' => 'verified'], function () {
-
+Route::group(['middleware' => 'verified'], function () {
+    // Only for testing purposes
     Route::get('dashboard/updateCategories', 'MaintainController@updateCategories')->name('dashboard.updateCategories');
     Route::get('dashboard/updateProjects', 'MaintainController@updateProjects')->name('dashboard.updateProjects');
     Route::get('dashboard/test', 'MaintainController@test')->name('dashboard.test');
-
     Route::get('dashboard/github', 'MaintainController@github')->name('dashboard.github');
 
-//});
+});
 
 // Documentation Routes
-
 Route::get('docs/', 'DocsController@index')->name('docs.index');
 Route::get('docs/{title}', 'DocsController@page')->name('docs.page');
-
 
 // Category Routes
 Route::get('categories/', 'CategoryController@showCategories')->name('list.category.index');
 Route::get('category/{category_code}/', 'CategoryController@show')->name('category.show');
 Route::get('category/{category_title}/{batch_id}', 'CategoryController@showByBatch')->name('category.batch');
 
-
-
-
-//Route::get('batches/', 'CategoryController@showBatches')->name('list.batch.index');
-
-//Route::get('batch/{batch_id}/', 'CategoryController@showBatchCategories')->name('category.showBatch');
-
-
-
 // Project Routes
 Route::get('projects/', 'ProjectController@index')->name('project.index');
 Route::get('project/{title}', 'ProjectController@show')->name('project.show');
 Route::get('project/refresh/{project}', 'ProjectController@update')->name('project.update');
-
-
-// Batch/Category specific project (need a routing mechanism in future)
-Route::get('batch/{batch_id}/{category_title}', 'ProjectController@showBC_Project')->name('category.showBC.Project');
