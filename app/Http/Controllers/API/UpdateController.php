@@ -207,8 +207,6 @@ class UpdateController extends Controller
 
                     if($isNew){
                         $p->categories()->attach($category->id);
-                    }else{
-                        //$p->categories()->sync();
                     }
 
                     $resp[$category_code][$project['title']] = $p;
@@ -285,12 +283,11 @@ class UpdateController extends Controller
             $p->repo_updated = date("Y-m-d h:i:s", strtotime($project['repo_updated']));
             $p->default_branch = $project['default_branch'];
 
-            $p->save();
-
-            // TODO: Need to care this
             if($categoryParam != null) {
-                $p->categories()->syncWithoutDetaching($category->id);
+                $p->categories()->syncWithoutDetaching([$category->id]);
             }
+
+            $p->save();
 
             // Get project own configurations
             $projURL = "https://$organization.github.io/$title/data/";
