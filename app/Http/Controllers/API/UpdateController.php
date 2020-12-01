@@ -117,7 +117,7 @@ class UpdateController extends Controller
                         return preg_match("/" . $pattern['filter'] . "/", $value['name']);
                     });
 
-                    //$category_code = $category->category_code;
+                    $category_code = $category->category_code;
 
                     $newRepositories = $filtered->mapWithKeys(function ($repo) use ($category_code) {
                         // This will filter out unwanted parameters from the repository list
