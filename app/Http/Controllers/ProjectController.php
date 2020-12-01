@@ -35,40 +35,25 @@ class ProjectController extends Controller
 
     public function show($title)
     {
-        // Request project data from internal API
+        $project = Project::where('name', $title)->first();
 
-        $data = Project::getGithubData($title);
+        if ($project == null) return \Response::view('errors.404', [], 404);
 
-        if($data != null){
-            return view('project.view', compact(['title', 'data']));
-        }else{
-            return \Response::view('errors.500',[],500);
-        }
+
+        //$category_code = $project->getParentCategory()->category_code;
+
+        // Sync the database with the latest updates, using a cache architecture
+        if ($project->syncProject()) $project = $project->fresh();
+
+        return view('project.view', compact(['title', 'project']));
     }
 
-
-    public function showBC_Project($batch_id, $category_title)
+    public function update(Project $project)
     {
-        return view('project.view', compact(['batch_id', 'category_title']));
+
+        $request = Request::create(route('api.update.singleProject', [$project->organization, $project->repo_name]), 'GET');
+        $response = Route::dispatch($request);
+        return redirect()->route('project.show', $project->name);
     }
 
-    public function showCB_Project($category_title, $batch_id)
-    {
-        return view('project.view', compact(['batch_id', 'category_title']));
-    }
-
-    public function edit(Project $project)
-    {
-        //
-    }
-
-    public function update(Request $request, Project $project)
-    {
-        //
-    }
-
-    public function destroy(Project $project)
-    {
-        //
-    }
 }

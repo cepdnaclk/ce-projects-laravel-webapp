@@ -67,7 +67,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'Asia/Colombo',
 
     /*
     |--------------------------------------------------------------------------
@@ -175,7 +175,8 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
-        GrahamCampbell\GitHub\GitHubServiceProvider::class
+        GrahamCampbell\GitHub\GitHubServiceProvider::class,
+
     ],
 
     /*

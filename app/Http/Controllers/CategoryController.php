@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Category;
 use App\Project;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CategoryController extends Controller
 {
@@ -13,60 +14,27 @@ class CategoryController extends Controller
         //$this->middleware('auth');
     }
 
-    public function showCategories()
-    {
-        $data = Category::getGithubData();
 
-        if($data != null){
-            return view('category.categories', compact(['data']));
-        }else{
-            return \Response::view('errors.500',[],500);
-        }
-        //return view('category.categories');
+    public function show($category_code)
+    {
+        $category = Category::where('category_code', $category_code)->first();
+        if ($category == null) return \Response::view('errors.404', [], 404);
+
+        $batches = $category->getBatches();                 // Get batches under given category
+        $projects = $category->projects()->paginate(12);    // List of projects
+        $project_count = $category->projects()->count();    // All projects, not the project count in current page
+
+        return view('category.view', compact(['category', 'projects', 'batches', 'project_count']));
     }
 
-    public function showBatches()
+    public function showByBatch($category_code, $batch)
     {
-        return view('category.batches');
-    }
+        $category = Category::where('category_code', $category_code)->first();
+        $projects = $category->projects()->where('batch', $batch)->get()->unique();
+        $batches = null;
+        $project_count = $projects->count();
+        $subtitle = $batch;
 
-    public function showBatchCategories($batch_id)
-    {
-        return view('category.batch_category', compact('batch_id'));
-    }
-
-    public function showCategoryBatches($category_title)
-    {
-        return view('category.category_batch', compact('category_title'));
-    }
-
-    public function create()
-    {
-
-    }
-
-    public function store(Request $request)
-    {
-        //
-    }
-
-    public function show(Category $category)
-    {
-        return view('category.view', compact('category'));
-    }
-
-    public function edit(Category $category)
-    {
-        //
-    }
-
-    public function update(Request $request, Category $category)
-    {
-        //
-    }
-
-    public function destroy(Category $category)
-    {
-        //
+        return view('category.view', compact(['category', 'projects', 'batches', 'subtitle', 'project_count']));
     }
 }
