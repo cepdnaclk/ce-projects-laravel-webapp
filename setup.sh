@@ -23,6 +23,9 @@ npm run development
 
 # npm run production
 
+# This is optional instruction
+sudo apt-get install php-sqlite3
+
 echo "Creating the database : sqlite"
 mkdir -p database
 touch database/database.sqlite

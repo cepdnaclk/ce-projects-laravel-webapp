@@ -123,8 +123,8 @@ class UpdateController extends Controller
                         // This will filter out unwanted parameters from the repository list
                         $request = Request::create(route('api.update.singleProjectWithCategory', [$repo['owner']['login'], $repo['name'], $category_code]), 'GET');
                         $response = Route::dispatch($request);
-                        $repo = json_decode($response->getContent(), true);
-                        return [$repo['name'] => $repo];//$this->prepareRepository($repo,$category_code);
+                        $repoData = json_decode($response->getContent(), true);
+                        return [$repoData['name'] => $repoData];//$this->prepareRepository($repo,$category_code);
                     });
 
                     // merge search results
