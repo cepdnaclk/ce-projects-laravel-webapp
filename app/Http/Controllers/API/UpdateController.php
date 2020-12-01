@@ -197,8 +197,8 @@ class UpdateController extends Controller
                     $p->image = ($project['coverImgLink'] != "") ? $project['coverImgLink'] : $category->cover_image;
                     $p->thumbnail = ($project['thumbImgLink'] != "") ? $project['thumbImgLink'] : $category->thumb_image;
 
-                    //$p->repo_created = $project['repo_created'];
-                    //$p->repo_updated = $project['repo_updated'];
+                    $p->repo_created = date("Y-m-d h:i:s", strtotime($project['repo_created']));
+                    $p->repo_updated = date("Y-m-d h:i:s", strtotime($project['repo_updated']));
                     $p->default_branch = $project['default_branch'];
 
                     $p->save();
