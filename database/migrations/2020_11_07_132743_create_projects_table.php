@@ -14,7 +14,9 @@ class CreateProjectsTable extends Migration
     public function up()
     {
         Schema::create('projects', function (Blueprint $table) {
+            //$table->engine = 'InnoDB';
             $table->id();
+            
             $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE'); // used for soft update
             $table->string('title');                // Actual project name
             $table->string('name')->unique();       // This is used to show in the URL
