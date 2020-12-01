@@ -124,7 +124,9 @@ class UpdateController extends Controller
                         $request = Request::create(route('api.update.singleProjectWithCategory', [$repo['owner']['login'], $repo['name'], $category_code]), 'GET');
                         $response = Route::dispatch($request);
                         $repoData = json_decode($response->getContent(), true);
-                        return [$repoData['name'] => $repoData];//$this->prepareRepository($repo,$category_code);
+
+                        return [$repoData['full_name'] => $repoData];
+                        //return [$repoData['name'] => $repoData];//$this->prepareRepository($repo,$category_code);
                     });
 
                     // merge search results
