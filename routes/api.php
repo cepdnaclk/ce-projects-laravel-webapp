@@ -14,9 +14,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+/*
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+*/
+
 
 Route::get('repository/{organization}/{title}', 'API\RepositoryController@show')->name('api.repository.show');
 Route::get('repository/{organization}/{title}/languages', 'API\RepositoryController@getRepoLanguages')->name('api.repository.languages');
