@@ -34,10 +34,10 @@ Route::get('update/categories', 'API\UpdateController@updateCategories')->name('
 Route::get('update/projects', 'API\UpdateController@updateProjects')->name('api.update.projects');
 Route::get('update/projects/soft', 'API\UpdateController@softUpdateProjects')->name('api.update.projects.soft');
 
-Route::get('update/project/{organization}/{title}', 'API\UpdateController@updateSingleProject')->name('api.update.singleProject');
 Route::get('update/project/{organization}/{title}/{category}', 'API\UpdateController@updateSingleProject')->name('api.update.singleProjectWithCategory');
+Route::get('update/project/{organization}/{title}', 'API\UpdateController@updateSingleProject')->name('api.update.singleProject');
 
-Route::post('update/project/{organization}/{title}', 'API\UpdateController@updateSingleProject')->name('api.update.singleProject'); // request coming from GitHub Web-hook
+Route::post('update/project/{organization}/{title}', 'API\UpdateController@updateSingleProject')->name('api.update.singleProject.post'); // request coming from GitHub Web-hook
 
 // TODO: define a soft update route
 
