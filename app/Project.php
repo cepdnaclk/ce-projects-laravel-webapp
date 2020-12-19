@@ -27,7 +27,7 @@ class Project extends Model
     // Get a list of categories that the project is registered
     public function categories()
     {
-        return $this->belongsToMany(Category::class);
+        return [];//$this->belongsToMany(Category::class);
     }
 
     // Get a list of students
