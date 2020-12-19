@@ -22,9 +22,11 @@ class CategoryController extends Controller
 
         $batches = $category->getBatches();                 // Get batches under given category
         $projects = $category->projects()->paginate(12);    // List of projects
-        $project_count = $category->projects()->count();    // All projects, not the project count in current page
+        //dd($projects);
 
-        return view('category.view', compact(['category', 'projects', 'batches', 'project_count']));
+        $project_count = $category->projects()->count();    // All projects, not the project count in current page
+        $subtitle = '';
+        return view('category.view', compact(['category', 'projects', 'batches', 'subtitle', 'project_count']));
     }
 
     public function showByBatch($category_code, $batch)

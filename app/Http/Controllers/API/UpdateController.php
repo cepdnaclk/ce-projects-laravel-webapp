@@ -218,7 +218,7 @@ class UpdateController extends Controller
                     $p->save();
 
                     if ($isNew) {
-                        $p->categories()->attach($category->id);
+                        //$p->categories()->attach($category->id);
                     }
 
                     $resp[$category_code][$project['title']] = $p;
@@ -299,7 +299,7 @@ class UpdateController extends Controller
             $p->save();
 
             if ($categoryParam != null) {
-                $p->categories()->syncWithoutDetaching([$category->id]);
+                //$p->categories()->syncWithoutDetaching([$category->id]);
             }
 
             // Get project own configurations
