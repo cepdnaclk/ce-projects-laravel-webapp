@@ -27,7 +27,7 @@ class Project extends Model
     // Get a list of categories that the project is registered
     public function categories()
     {
-        return $this->belongsToMany(Category::class);
+        return [Category::getByCode($this->main_category)];//;$this->belongsToMany(Category::class);
     }
 
     // Get a list of students
@@ -126,11 +126,11 @@ class Project extends Model
 
     public static function deleteAll()
     {
-        $base = Project::all();
+        /*$base = Project::all();
         $base->each(function ($item, $key) {
             $item->categories()->detach();
             $item->delete();
-        });
+        });*/
     }
 
 }
