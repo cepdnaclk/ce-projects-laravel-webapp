@@ -35,7 +35,16 @@ class UpdateController extends Controller
 
             if ($response->getStatusCode() == 200) {
                 $data = json_decode($response->getBody(), true);
-                Category::truncate();
+
+                //Category::truncate();
+
+                // Remove many to many join
+                $base = Category::all();
+                $base->each(function ($item, $key){
+                    $item->projects()->detach();
+                    $item->delete();
+                });
+
 
                 foreach ($data as $key => $category) {
                     // fetch each category, one by one and add to the categories table
@@ -117,14 +126,18 @@ class UpdateController extends Controller
                         return preg_match("/" . $pattern['filter'] . "/", $value['name']);
                     });
 
-                    //$category_code = $category->category_code;
+
+                    $category_code = $category->category_code;
 
                     $newRepositories = $filtered->mapWithKeys(function ($repo) use ($category_code) {
                         // This will filter out unwanted parameters from the repository list
-                        $request = Request::create(route('api.update.singleProjectWithCategory', [$repo['owner']['login'], $repo['name'], $category_code]), 'GET');
-                        $response = Route::dispatch($request);
-                        $repo = json_decode($response->getContent(), true);
-                        return [$repo['name'] => $repo];//$this->prepareRepository($repo,$category_code);
+                        //$request = Request::create(route('api.update.singleProjectWithCategory', [$repo['owner']['login'], $repo['name'], $category_code]), 'GET');
+                        $response = json_decode($this->updateSingleProject($repo['owner']['login'], $repo['name'], $category_code), true);
+
+                        //dd($response);
+
+                        //return [$repoData['full_name'] => $repoData];
+                        return [$response['name'] => $response];//$this->prepareRepository($repo,$category_code);
                     });
 
                     // merge search results
@@ -140,10 +153,11 @@ class UpdateController extends Controller
         return response()->json($resp);
     }
 
-    public function softUpdateProjects(){
+    public function softUpdateProjects()
+    {
 
         $categories = Category::all();
-        $projects = Project::where('status','ACTIVE')->update(['status'=>'INACTIVE']);
+        $projects = Project::where('status', 'ACTIVE')->update(['status' => 'INACTIVE']);
         $resp = [];
 
         foreach ($categories as $category) {
@@ -167,7 +181,7 @@ class UpdateController extends Controller
                     }
 
                     $p->title = $project['title'];
-                    $p->status ='ACTIVE';
+                    $p->status = 'ACTIVE';
                     $p->name = $project['name'];
                     $p->repo_name = $project['full_name'];
                     $p->organization = $project['organization'];
@@ -203,10 +217,8 @@ class UpdateController extends Controller
 
                     $p->save();
 
-                    if($isNew){
+                    if ($isNew) {
                         $p->categories()->attach($category->id);
-                    }else{
-                        //$p->categories()->sync();
                     }
 
                     $resp[$category_code][$project['title']] = $p;
@@ -219,12 +231,12 @@ class UpdateController extends Controller
         }
 
         // Delete non-existing projects
-        $deletedProjects = Project::where('status','INACTIVE')->delete();
+        $deletedProjects = Project::where('status', 'INACTIVE')->delete();
         return response()->json($resp);
 
-        }
+    }
 
-    public function updateSingleProject($organization, $title, $categoryParam=null)
+    public function updateSingleProject($organization, $title, $categoryParam = null)
     {
         // TODO: require some validation
 
@@ -234,7 +246,7 @@ class UpdateController extends Controller
         if ($response->getStatusCode() == 200) {
 
             $project = json_decode($response->getContent(), true);
-            $categoryCode = ($categoryParam==null) ? $project['category'] : $categoryParam;
+            $categoryCode = ($categoryParam == null) ? $project['category'] : $categoryParam;
             $category = Category::getByCode($categoryCode);
 
             // Select default cover and thumbnail images
@@ -245,6 +257,7 @@ class UpdateController extends Controller
                 $category_cover = $category->cover_image;
                 $category_thumb = $category->thumb_image;
             }
+
 
             $p = Project::getByName($project['name']);
 
@@ -285,9 +298,8 @@ class UpdateController extends Controller
 
             $p->save();
 
-            // TODO: Need to care this
-            if($categoryParam != null) {
-                $p->categories()->syncWithoutDetaching($category->id);
+            if ($categoryParam != null) {
+                $p->categories()->syncWithoutDetaching([$category->id]);
             }
 
             // Get project own configurations
@@ -321,8 +333,7 @@ class UpdateController extends Controller
             // TODO: Test the functionality
             $resp['error'] = "not found";
         }
-
-        return response()->json($resp);
+        return $resp; //response()->json();
     }
 
     private function fileExists($url)
