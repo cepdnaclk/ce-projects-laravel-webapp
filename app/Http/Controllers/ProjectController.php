@@ -51,7 +51,7 @@ class ProjectController extends Controller
     public function update(Project $project)
     {
 
-        $request = Request::create(route('api.update.singleProject', [$project->organization, $project->repo_name]), 'GET');
+        $request = Request::create(route('api.update.singleProjectWithCategory', [$project->organization, $project->repo_name, $project->main_category]), 'GET');
         $response = Route::dispatch($request);
         return redirect()->route('project.show', $project->name);
     }
