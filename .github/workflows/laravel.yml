@@ -24,7 +24,7 @@ jobs:
       run: |
         mkdir -p database
         touch database/database.sqlite
-        chmod -R 777 database/database.sqlite
+        chmod -R 775 database/database.sqlite
 
     - name: Generate key
       run: php artisan key:generate
