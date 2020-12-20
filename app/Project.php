@@ -68,6 +68,8 @@ class Project extends Model
 
         // if the difference is greater then $cacheTime, it will automatically update the project details from GitHub
 
+        // TODO: remove language and contributor test and implement it using Vue
+
         if ($diff >= $cacheTime || $this->contributorData == null || $this->languageData == null) {
             $request = Request::create(route('api.update.singleProjectWithCategory', [$this->organization, $this->repo_name, $this->main_category]), 'GET');
             $response = Route::dispatch($request);
@@ -78,6 +80,7 @@ class Project extends Model
         }
     }
 
+    // TODO: Need to check the usage and remove if no use in future
     public function getGithubData()
     {
         // This will make a request to internal API server and obtain and return the data
@@ -90,20 +93,12 @@ class Project extends Model
 
     public function getLanguages()
     {
-        $request = Request::create(route('api.repository.languages', [$this->organization, $this->repo_name]), 'GET');
-        $response = Route::dispatch($request);
-        $data = json_decode($response->getContent(), true);
-
-        return $data;
+        return self::getRepoLanguages($this->organization, $this->repo_name);
     }
 
     public function getContributors()
     {
-        $request = Request::create(route('api.repository.contributors', [$this->organization, $this->repo_name]), 'GET');
-        $response = Route::dispatch($request);
-        $data = json_decode($response->getContent(), true);
-
-        return $data;
+        return self::getRepoContributors($this->organization, $this->repo_name);
     }
 
     public static function formatTitle($link_title)
@@ -131,6 +126,120 @@ class Project extends Model
             $item->categories()->detach();
             $item->delete();
         });*/
+    }
+
+    // The the list of contributors on a given repository
+    public static function getRepoContributors($organization, $title)
+    {
+        // Ex: http://projects.ce.pdn.ac.lk/api/repository/{{organization}}/{{title}}/contributors
+
+        try {
+            $contributors = GitHub::api('repo')->contributors($organization, $title);
+            return collect($contributors)->map(function ($contributor) {
+                return [
+                    'username' => $contributor['login'],
+                    'avatar' => $contributor['avatar_url'],
+                    'url' => $contributor['html_url'],
+
+                    /*'name' => $contributor['name'],*/
+                    /*'data' => $contributor,*/
+                ];
+            })->toArray();
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    // The the list of languages used on a given repository
+    public static function getRepoLanguages($organization, $title)
+    {
+        // Ex: http://projects.ce.pdn.ac.lk/api/repository/{{organization}}/{{title}}/languages
+
+        try {
+            $lang = GitHub::api('repo')->languages($organization, $title);
+
+            return ['count' => count($lang), 'total' => array_sum($lang), 'list' => $lang];
+
+        } catch (\Exception $e) {
+            return ['count' => 0, 'total' => 0, 'list' => []];
+        }
+    }
+
+    public static function prepareRepository($org, $repo, $category_code)
+    {
+
+        $parts = explode('-', $repo['name']);
+        $organization = $repo['owner']['login'];
+
+        // TODO: Need to format this name by a better way
+
+        if (strtolower(substr($repo['name'], 0, 1)) == "e") {
+            // COURSE project
+
+            $title = Project::formatTitle(substr($repo['name'], (strlen($parts[0]) + 2 + strlen($parts[1]))));
+            $repoName = $parts[0] . "-" . (substr($repo['name'], (strlen($parts[0]) + 2 + strlen($parts[1]))));
+            $batch = $parts[0];
+            $mainCategory = $category_code;
+
+        } else {
+            // DEPARTMENT project
+
+            $title = str_replace('-', " ", $repo['name']);
+            $repoName = $repo['name'];
+            $batch = null;
+            $mainCategory = $category_code;
+        }
+
+        if ($repo['has_pages']) {
+            // Obtain some data from the repository, if GitHub pages already available
+
+            $pageLink = "https://" . $org . ".github.io/" . $repo['name'];
+            $imgLink = $pageLink . "/img_cover.jpg";
+            $imgLink = (self::fileExists($imgLink)) ? $imgLink : '';
+
+            $thumbLink = $pageLink . "/img_thumb.jpg";
+            $thumbLink = (self::fileExists($thumbLink)) ? $thumbLink : '';
+        }
+
+        return [$repo['name'] => [
+            'title' => $title,
+            'name' => $repoName,
+            'full_name' => $repo['name'],
+            'description' => $repo['description'],
+            'batch' => $batch,
+            'category' => $mainCategory,
+            'organization' => $organization,
+
+            'repoLink' => $repo['html_url'],
+            'pageLink' => ($repo['has_pages']) ? $pageLink : '',
+
+            'coverImgLink' => ($repo['has_pages']) ? $imgLink : '',
+            'thumbImgLink' => ($repo['has_pages']) ? $thumbLink : '',
+
+            'has_pages' => $repo['has_pages'],
+            'has_wiki' => $repo['has_wiki'],
+
+            'private' => $repo['private'],
+            'language' => $repo['language'],
+            'forks' => $repo['forks'],
+            'watchers' => $repo['watchers'],
+            'stars' => $repo['stargazers_count'],
+
+            'repo_created' => date_format(date_create($repo['created_at']), "Y-m-d"),
+            'repo_updated' => date_format(date_create($repo['updated_at']), "Y-m-d h:i:s"),
+            'default_branch' => $repo['default_branch'],
+        ]];
+    }
+
+    private static function fileExists($url)
+    {
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_NOBODY, true);
+        curl_exec($ch);
+        $responseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        return ($responseCode == 200);
     }
 
 }

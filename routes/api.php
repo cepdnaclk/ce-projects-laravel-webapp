@@ -30,6 +30,7 @@ Route::get('repositories/{organization}', 'API\RepositoryController@index')->nam
 Route::get('repositories/{category_code}/filter/', 'API\RepositoryController@categoryFilter')->name('api.repository.filter');
 
 
+Route::get('update/all', 'API\UpdateController@updateAll')->name('api.update.all');
 Route::get('update/categories', 'API\UpdateController@updateCategories')->name('api.update.categories');
 Route::get('update/projects', 'API\UpdateController@updateProjects')->name('api.update.projects');
 Route::get('update/projects/soft', 'API\UpdateController@softUpdateProjects')->name('api.update.projects.soft');
@@ -39,5 +40,8 @@ Route::get('update/project/{organization}/{title}', 'API\UpdateController@update
 
 Route::post('update/project/{organization}/{title}', 'API\UpdateController@updateSingleProject')->name('api.update.singleProject.post'); // request coming from GitHub Web-hook
 
-// TODO: define a soft update route
+
+Route::get('test', 'API\RepositoryController@test');
+
+
 
