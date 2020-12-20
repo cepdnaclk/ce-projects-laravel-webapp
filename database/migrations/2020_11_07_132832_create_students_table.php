@@ -13,6 +13,8 @@ class CreateStudentsTable extends Migration
      */
     public function up()
     {
+        /*
+        // TODO: Not Implemented
         Schema::create('students', function (Blueprint $table) {
             $table->id();
             //$table->string('initials');
@@ -21,13 +23,14 @@ class CreateStudentsTable extends Migration
             $table->string('eNumber', 8)->unique();    // Ex: E/15/140
             //$table->timestamps();
         });
-    }
+        */
+}
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
+/**
+* Reverse the migrations.
+*
+* @return void
+*/
     public function down()
     {
         Schema::dropIfExists('students');

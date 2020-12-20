@@ -13,6 +13,8 @@ class CreateSupervisorsTable extends Migration
      */
     public function up()
     {
+        /*
+        // TODO: Not Implemented
         Schema::create('supervisors', function (Blueprint $table) {
             $table->id();
             //$table->enum('title', ['Mr.', 'Mrs.', 'Miss.', 'Dr.', 'Prof.'])->nullable();
@@ -20,6 +22,7 @@ class CreateSupervisorsTable extends Migration
             $table->string('email')->unique();                // Must be eng.pdn.ac.lk email
             //$table->timestamps();
         });
+        */
     }
 
     /**
