@@ -19,8 +19,6 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 */
-
-
 Route::get('repository/{organization}/{title}', 'API\RepositoryController@show')->name('api.repository.show');
 Route::get('repository/{organization}/{title}/languages', 'API\RepositoryController@getRepoLanguages')->name('api.repository.languages');
 Route::get('repository/{organization}/{title}/contributors', 'API\RepositoryController@getRepoContributors')->name('api.repository.contributors');
@@ -42,6 +40,3 @@ Route::post('update/project/{organization}/{title}', 'API\UpdateController@updat
 
 
 Route::get('test', 'API\RepositoryController@test');
-
-
-
