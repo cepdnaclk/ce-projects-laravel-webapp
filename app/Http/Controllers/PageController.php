@@ -21,8 +21,10 @@ class PageController extends Controller
 
     public function home(){
 
-        $categories = Category::all();
-        return view('pages.home', compact('categories'));
+        $courseProj  = Category::where('type', 'COURSE')->get();
+        $departProj  = Category::where('type', 'DEPARTMENT')->get();
+
+        return view('pages.home', compact(['courseProj', 'departProj']));
     }
     public function about(){
         return view('pages.about');

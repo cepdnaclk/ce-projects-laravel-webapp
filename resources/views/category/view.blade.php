@@ -6,7 +6,7 @@
     <div class="p-3">
 
         <div class="row">
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <h3>{{ $category->title }}</h3>
 
                 <p>{{ $category->description }}</p>
@@ -14,12 +14,22 @@
                 @if($category->type=='COURSE')
                     {{-- Course projects --}}
 
-                    @if($batches != null )
+                    @if($subtitle != '')
+                        {{-- with batch filter  --}}
                         <div class="container m-0 p-0">
-                            <div class="p-1"><a href="{{ route('home') }}">Back</a> | {{ $project_count }} Projects
+                            <div class="p-1"><a href="{{ route('category.show', [$category->category_code]) }}">Back</a>
+                                | {{ $project_count }} Projects
                             </div>
                             <hr>
+                        </div>
 
+                    @elseif($subtitle == '')
+
+                        <div class="p-1"><a href="{{ route('home') }}">Back</a>
+                            | {{ $project_count }} Projects<br>
+                        </div>
+                        <hr>
+                        <div class="p-1">
                             Filter Projects by:
 
                             <ul class="list-group">
@@ -35,12 +45,12 @@
                                 @endforeach
                             </ul>
                         </div>
+                        <br><br>
+
                     @else
-                        <div class="p-1"><a href="{{ route('category.show', $category->category_code) }}">Back</a>
+                        <div class="p-1"><a href="{{ route('home')}}">Back</a>
                             | {{ $project_count }} Projects
                         </div>
-                        <hr>
-                        Projects by <b>{{ $subtitle }}</b> batch
                         <br><br>
                     @endif
                 @else
@@ -53,7 +63,7 @@
                 @endif
             </div>
 
-            <div class="col-md-10">
+            <div class="col-md-9">
 
                 <div class="d-none row">
                     <!-- Preview Image -->

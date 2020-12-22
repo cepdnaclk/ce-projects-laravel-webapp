@@ -23,16 +23,19 @@ class UpdateController extends Controller
         $this->paginator = new \Github\ResultPager($this->client);
     }
 
-    public function updateAll(){
+    public function updateAll()
+    {
         $cat = $this->updateCategories()->getOriginalContent()['data'];
         $proj = $this->updateProjects()->getOriginalContent()['data'];
 
-        return response()->json(['categories'=>$cat, 'projects'=>$proj]);
+        return response()->json(['categories' => $cat, 'projects' => $proj]);
     }
 
 
     public function updateCategories()
     {
+        $start_time = microtime(true); // To measure the execution time
+
         $url = $this->dataRepository . "/data/categories/list.json";
         $client = new \GuzzleHttp\Client();
         $resp = [];
@@ -53,41 +56,46 @@ class UpdateController extends Controller
                 foreach ($data as $key => $category) {
                     // fetch each category, one by one and add to the categories table
 
-                    $categoryURL = $this->dataRepository . "/data/categories/" . $key . "/index.json";
-                    $response = $client->request('GET', $categoryURL);
-                    $catData = json_decode($response->getBody(), true);
+                    try {
+                        $categoryURL = $this->dataRepository . "/data/categories/" . $key . "/index.json";
+                        $response = $client->request('GET', $categoryURL);
+                        $catData = json_decode($response->getBody(), true);
 
-                    $coverURL = $this->dataRepository . "/data/categories/" . $key . "/" . $catData['images']['cover'];
-                    $thumbURL = $this->dataRepository . "/data/categories/" . $key . "/" . $catData['images']['thumbnail'];
+                        $coverURL = $this->dataRepository . "/data/categories/" . $key . "/" . $catData['images']['cover'];
+                        $thumbURL = $this->dataRepository . "/data/categories/" . $key . "/" . $catData['images']['thumbnail'];
 
-                    if ($this->fileExists($coverURL) == false) {
-                        // Use the default one
-                        $coverURL = $this->dataRepository . "/data/categories/template/cover_page.jpg";
-                    }
+                        if ($this->fileExists($coverURL) == false) {
+                            // Use the default one
+                            $coverURL = $this->dataRepository . "/data/categories/template/cover_page.jpg";
+                        }
 
-                    if ($this->fileExists($thumbURL) == false) {
-                        // Use the default one
-                        $thumbURL = $this->dataRepository . "/data/categories/template/thumbnail.jpg";
-                    }
+                        if ($this->fileExists($thumbURL) == false) {
+                            // Use the default one
+                            $thumbURL = $this->dataRepository . "/data/categories/template/thumbnail.jpg";
+                        }
 
-                    if ($catData != null) {
-                        // TODO: require some validation
+                        if ($catData != null) {
+                            // TODO: require some validation
 
-                        $c = new Category();
-                        $c->title = $catData['title'];
-                        $c->type = $catData['type'];
-                        $c->category_code = $catData['code'];
-                        $c->description = $catData['description'];
-                        $c->cover_image = $coverURL;
-                        $c->thumb_image = $thumbURL;
-                        $c->filters = $catData['filters'];
-                        $c->contact = $catData['contact'];
-                        $c->save();
+                            $c = new Category();
+                            $c->title = $catData['title'];
+                            $c->type = $catData['type'];
+                            $c->category_code = $catData['code'];
+                            $c->description = $catData['description'];
+                            $c->cover_image = $coverURL;
+                            $c->thumb_image = $thumbURL;
+                            $c->filters = $catData['filters'];
+                            $c->contact = $catData['contact'];
+                            $c->save();
 
-                        $resp['data'][$key] = $catData;
+                            $resp['data'][$key] = $catData;
 
-                    } else {
-                        $resp['data'][$key] = ["error" => "$categoryURL not found"];
+                        } else {
+                            $resp['data'][$key] = ["error" => "$categoryURL not found"];
+                        }
+
+                    } catch (Exception $e) {
+                        $resp['data'][$key] = ["error" => $e->getMessage()];
                     }
                 }
             } else {
@@ -100,7 +108,12 @@ class UpdateController extends Controller
             $resp['statusDetails'] = $e->getMessage();
 
         } finally {
-            return response()->json($resp);
+
+            // To measure the execution time
+            $end_time = microtime(true);
+            $execution_time = round($end_time - $start_time, 2) . " sec";
+
+            return response()->json(['time' => $execution_time, 'result' => $resp]);
         }
     }
 
@@ -149,9 +162,9 @@ class UpdateController extends Controller
 
         // To measure the execution time
         $end_time = microtime(true);
-        $execution_time = round($end_time - $start_time, 2)." sec";
+        $execution_time = round($end_time - $start_time, 2) . " sec";
 
-        return response()->json(['time'=> $execution_time, 'result'=>$resp]);
+        return response()->json(['time' => $execution_time, 'result' => $resp]);
     }
 
     public function softUpdateProjects()
@@ -238,9 +251,9 @@ class UpdateController extends Controller
 
         // To measure the execution time
         $end_time = microtime(true);
-        $execution_time = round($end_time - $start_time, 2)." sec";
+        $execution_time = round($end_time - $start_time, 2) . " sec";
 
-        return response()->json(['time'=> $execution_time, 'result'=>$resp]);
+        return response()->json(['time' => $execution_time, 'result' => $resp]);
     }
 
     public function updateSingleProject($organization, $title, $categoryParam = null)
@@ -333,7 +346,9 @@ class UpdateController extends Controller
 
         } else {
             // not found; delete the project from the database
-            // TODO: Implement the functionality
+            $p = Project::getByRepoTitle($title);
+            if($p != null) $p->delete();
+
             $resp['error'] = "not found";
         }
         return $resp; //response()->json();
