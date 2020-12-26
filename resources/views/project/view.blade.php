@@ -133,9 +133,7 @@
                     </div>
                 </div>
 
-                <!-- Categories Widget
-                <language-component repository="{{ $project->name }}" organization="{{ $project->organization }}"></language-component>
- -->
+                <!-- Categories Widget -->
 
                 @if($project->languageData && $project->languageData['count']>0 )
                     <div class="card my-4 pb-3">
@@ -184,9 +182,6 @@
                 @endif
             </div>
         </div>
-
-        {{-- json_encode($project, JSON_PRETTY_PRINT) --}}
-
 
         <div class="container text-center p-2">
             <hr>

@@ -27,10 +27,7 @@ class Category extends Model
 
     public function getBatches()
     {
-        $batches = DB::select("SELECT batch, COUNT(*) as count
-            FROM projects as p, categories as c
-            WHERE (p.main_category = '".$this->category_code."') AND (p.main_category = c.category_code)
-            GROUP BY `batch` ORDER BY `batch` DESC");
+        $batches = DB::select("SELECT batch, COUNT(*) as count FROM projects as p, category_project as cp, categories as c WHERE p.id = cp.project_id AND (c.id=cp.category_id) AND c.category_code = '" . $this->category_code . "' GROUP BY `batch` ORDER BY `batch` DESC");
         return $batches;
     }
 
