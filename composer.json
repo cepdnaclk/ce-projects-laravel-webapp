@@ -38,7 +38,7 @@
         "laravel": {
             "dont-discover": []
         }
-    },a
+    },
     "autoload": {
         "psr-4": {
             "App\\": "app/"
