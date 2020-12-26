@@ -128,31 +128,7 @@ class UpdateController extends Controller
         foreach ($categories as $category) {
             try {
                 $category_code = $category->category_code;
-                $repositories = [];
-
-                foreach ($category->filters as $pattern) {
-                    // Filter with the given list of regex filters
-
-                    $category_code = $category->category_code;
-                    $allRepos = $this->paginator->fetchAll($this->client->user(), 'repositories', [$pattern['organization']]);
-
-                    $filtered = collect($allRepos)->filter(function ($value, $key) use ($pattern) {
-                        return preg_match("/" . $pattern['filter'] . "/", $value['name']);
-                    });
-
-                    $newRepositories = $filtered->mapWithKeys(function ($repo) use ($category_code) {
-                        $org = $repo['owner']['login'];
-                        $title = $repo['name'];
-                        $response = json_decode($this->updateSingleProject($org, $title, $category_code), true);
-                        //dd($response);
-                        return [$response['name'] => $response];
-                    });
-
-
-                    // merge search results
-                    $repositories = array_replace($repositories, $newRepositories->toArray());
-
-                }
+                $repositories = $this->updateSingleCategory($category_code);
                 $resp[$category_code] = $repositories;
 
             } catch (\Exception $ex) {
@@ -256,6 +232,44 @@ class UpdateController extends Controller
         return response()->json(['time' => $execution_time, 'result' => $resp]);
     }
 
+    public function updateSingleCategory($category_code)
+    {
+        try {
+            $category = Category::getByCode($category_code);
+            $repositories = [];
+
+            foreach ($category->filters as $pattern) {
+                // Filter with the given list of regex filters
+
+                $category_code = $category->category_code;
+                $allRepos = $this->paginator->fetchAll($this->client->user(), 'repositories', [$pattern['organization']]);
+
+                $filtered = collect($allRepos)->filter(function ($value, $key) use ($pattern) {
+                    return preg_match("/" . $pattern['filter'] . "/", $value['name']);
+                });
+
+                $newRepositories = $filtered->mapWithKeys(function ($repo) use ($category_code) {
+                    $org = $repo['owner']['login'];
+                    $title = $repo['name'];
+                    $response = json_decode($this->updateSingleProject($org, $title, $category_code), true);
+                    //dd($response);
+                    return [$response['name'] => $response];
+                });
+
+
+                // merge search results
+                $repositories = array_replace($repositories, $newRepositories->toArray());
+
+            }
+            //$resp[$category_code] = $repositories;
+
+        } catch (\Exception $ex) {
+            // Error handler
+        }
+
+        return $repositories;
+    }
+
     public function updateSingleProject($organization, $title, $categoryParam = null)
     {
         // TODO: require some validation
@@ -347,7 +361,7 @@ class UpdateController extends Controller
         } else {
             // not found; delete the project from the database
             $p = Project::getByRepoTitle($title);
-            if($p != null) $p->delete();
+            if ($p != null) $p->delete();
 
             $resp['error'] = "not found";
         }

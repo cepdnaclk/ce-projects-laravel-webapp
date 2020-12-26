@@ -29,13 +29,14 @@ Route::get('repositories/{category_code}/filter/', 'API\RepositoryController@cat
 
 
 Route::get('update/all', 'API\UpdateController@updateAll')->name('api.update.all');
+
 Route::get('update/categories', 'API\UpdateController@updateCategories')->name('api.update.categories');
+Route::get('update/category/{category_code}', 'API\UpdateController@updateSingleCategory')->name('api.update.singleCategory');
+
 Route::get('update/projects', 'API\UpdateController@updateProjects')->name('api.update.projects');
 Route::get('update/projects/soft', 'API\UpdateController@softUpdateProjects')->name('api.update.projects.soft');
-
 Route::get('update/project/{organization}/{title}/{category}', 'API\UpdateController@updateSingleProject')->name('api.update.singleProjectWithCategory');
 Route::get('update/project/{organization}/{title}', 'API\UpdateController@updateSingleProject')->name('api.update.singleProject');
-
 Route::post('update/project/{organization}/{title}', 'API\UpdateController@updateSingleProject')->name('api.update.singleProject.post'); // request coming from GitHub Web-hook
 
 
