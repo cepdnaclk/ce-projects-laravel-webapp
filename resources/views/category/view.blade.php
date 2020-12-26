@@ -30,20 +30,23 @@
                         </div>
                         <hr>
                         <div class="p-1">
-                            Filter Projects by:
+                            @if($project_count > 0)
+                                Filter Projects by:
 
-                            <ul class="list-group">
-                                @foreach($batches as $key=>$value)
-                                    <li class="list-group-item p-1 align-items-center">
-                                        <a href="{{ route('category.batch', [$category->category_code, $value->batch]) }}"
-                                           class="d-flex justify-content-between">
-                                            <span class="mx-2">{{ $value->batch }} Batch</span>
-                                            <span
-                                                class="mx-2 badge badge-secondary badge-pill">{{ $value->count }}</span>
-                                        </a>
-                                    </li>
-                                @endforeach
-                            </ul>
+                                <ul class="list-group">
+                                    @foreach($batches as $key=>$value)
+                                        <li class="list-group-item p-1 align-items-center">
+                                            <a href="{{ route('category.batch', [$category->category_code, $value->batch]) }}"
+                                               class="d-flex justify-content-between">
+                                                <span class="mx-2">{{ $value->batch }} Batch</span>
+                                                <span
+                                                    class="mx-2 badge badge-secondary badge-pill">{{ $value->count }}</span>
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                </ul>
+
+                            @endif
                         </div>
                         <br><br>
 
