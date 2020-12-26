@@ -234,9 +234,14 @@ class UpdateController extends Controller
 
     public function updateSingleCategory($category_code)
     {
+
+        $repositories = [];
+        $category = Category::getByCode($category_code);
+
+        // Delete existing projects
+        $p = $category->projects()->delete();
+
         try {
-            $category = Category::getByCode($category_code);
-            $repositories = [];
 
             foreach ($category->filters as $pattern) {
                 // Filter with the given list of regex filters
