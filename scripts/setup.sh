@@ -1,5 +1,8 @@
 
 # Copy env file
+
+../
+
 echo "Setup env file with defaults..."
 php -r "file_exists('.env') || copy('.env.example', '.env');"
 

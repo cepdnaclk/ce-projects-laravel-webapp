@@ -59,6 +59,11 @@ class Project extends Model
         return Project::where('name', $proj_name)->first();
     }
 
+    public static function getByRepoTitle($repo)
+    {
+        return Project::where('repo_name', $repo)->first();
+    }
+
     public function syncProject()
     {
         $updated = strtotime($this->updated_at);
