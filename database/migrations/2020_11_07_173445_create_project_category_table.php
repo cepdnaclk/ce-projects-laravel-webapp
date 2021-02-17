@@ -13,9 +13,6 @@ class CreateProjectCategoryTable extends Migration
      */
     public function up()
     {
-        /*
-        // TODO: Not Implemented
-
         Schema::create('category_project', function (Blueprint $table) {
             //$table->engine = 'InnoDB';
             $table->id();
@@ -26,7 +23,6 @@ class CreateProjectCategoryTable extends Migration
             //$table->foreign('project_id')->references('id')->on('project')->onDelete('cascade');
             //$table->foreign('category_id')->references('id')->on('category')->onDelete('cascade');
         });
-        */
     }
 
     /**
